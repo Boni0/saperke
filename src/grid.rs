@@ -12,7 +12,6 @@ pub enum GridCellState {
 
 #[derive(Clone, Copy, PartialEq)]
 pub enum GridCellVariant {
-    // WithValue(GridCellValue),
     WithValue(GridCellValueUnit),
     WithBomb,
     NonExist
@@ -36,10 +35,12 @@ pub struct GridStruct {
     pub shape_type: GridShape, // rename to GridShapeType
     pub cells: GridShapeVec, 
     pub cells_count: usize,
+    pub tagged_count: usize,
+    pub visible_count: usize
 }
 
 impl GridStruct {
-    pub fn new_rectangle_or_square_grid(width: usize, height: usize) -> GridStruct {
+    pub fn new_rectangle_or_square_grid(height: usize, width: usize) -> GridStruct {
         let mut cells: GridShapeVec = Vec::new();
 
         for x in 0..width {
@@ -64,7 +65,9 @@ impl GridStruct {
             height,
             shape_type: GridShape::RectangleOrSquare,
             cells,
-            cells_count: width * height
+            cells_count: width * height,
+            tagged_count: 0,
+            visible_count: 0
         }
     }
 
@@ -146,35 +149,49 @@ impl GridStruct {
         let mut variant_option = None;
         
         if let Some(cell) = self.get_cell(y_cord, x_cord) {
-            if GridCellState::Hidden == cell.state {
+            if GridCellState::Hidden == cell.state && GridCellVariant::NonExist != cell.variant {
                 cell.state = GridCellState::Visible;
                 variant_option = Some(cell.variant);
             }
         }
 
-        if let Some(GridCellVariant::WithValue(0)) = variant_option {
-            if y_cord != 0 {
-                self.set_cell_visible(y_cord - 1, x_cord);
-            }
-            if y_cord != self.height {
-                self.set_cell_visible(y_cord + 1, x_cord);
-            }
+        if let Some(variant) = variant_option {
+            self.visible_count += 1;
 
-            if x_cord != 0 {
-                self.set_cell_visible(y_cord, x_cord - 1);
-            }
-            if x_cord != self.width {
-                self.set_cell_visible(y_cord, x_cord + 1);
+            if GridCellVariant::WithValue(0) == variant {
+                if y_cord != 0 {
+                    self.set_cell_visible(y_cord - 1, x_cord);
+                }
+                if y_cord != self.height {
+                    self.set_cell_visible(y_cord + 1, x_cord);
+                }
+    
+                if x_cord != 0 {
+                    self.set_cell_visible(y_cord, x_cord - 1);
+                }
+                if x_cord != self.width {
+                    self.set_cell_visible(y_cord, x_cord + 1);
+                }
             }
         }
 
         variant_option
     }
 
-    pub fn set_cell_tagged(&mut self, y_cord: usize, x_cord: usize) {
+    pub fn toggle_cell_tagged(&mut self, y_cord: usize, x_cord: usize) {
         if let Some(cell) = self.get_cell(y_cord, x_cord) {
-            if GridCellState::Hidden == cell.state && GridCellVariant::NonExist != cell.variant {
-                cell.state = GridCellState::Tagged;
+            if GridCellVariant::NonExist != cell.variant {
+                match cell.state {
+                    GridCellState::Hidden => {
+                        cell.state = GridCellState::Tagged;
+                        self.tagged_count += 1;
+                    },
+                    GridCellState::Tagged => {
+                        cell.state = GridCellState::Hidden;
+                        self.tagged_count -= 1;
+                    },
+                    _ => {},
+                }
             }
         }
     }
