@@ -10,6 +10,7 @@ pub enum GridCellState {
     Visible
 }
 
+#[derive(Clone, Copy, PartialEq)]
 pub enum GridCellVariant {
     // WithValue(GridCellValue),
     WithValue(GridCellValueUnit),
@@ -141,50 +142,41 @@ impl GridStruct {
         }
     }
 
-    pub fn set_cell_visible<'a>(&'a mut self, cell: &mut GridCell /* y_cord: usize, x_cord: usize*/) /*-> Option<&GridCell>*/  {
-        // let mut cell ;
-
-        // match self.get_cell(y_cord, x_cord) {
-        //     Some(cell_ref) => {
-        //         if GridCellState::Hidden != cell_ref.state { return None }
-        //         else { cell = cell_ref; }
-        //     },
-        //     None => { return None },
-        // }
-
-        if GridCellState::Hidden != cell.state { return; }
-
-        cell.state = GridCellState::Visible;
-
-        if let GridCellVariant::WithValue(0) = cell.variant {
-            // let set_next_cell_visible = |next_cell| {
-            //     self.set_cell_visible(next_cell);
-            //     None
-            // };
-
-            if cell.y != 0 {
-                // let rc_self = Rc::new(self);
-                let next_cell = self.get_cell(cell.y - 1, cell.x).unwrap();
-                // self.set_cell_visible(next_cell);
+    pub fn set_cell_visible(&mut self, y_cord: usize, x_cord: usize) -> Option<GridCellVariant> {
+        let mut variant_option = None;
+        
+        if let Some(cell) = self.get_cell(y_cord, x_cord) {
+            if GridCellState::Hidden == cell.state {
+                cell.state = GridCellState::Visible;
+                variant_option = Some(cell.variant);
             }
-
-            // if cell.y != 0 {
-            //     self.get_cell(cell.y - 1, cell.x).and_then(set_next_cell_visible);
-            // }
-            // if cell.y != self.height {
-            //     self.get_cell(cell.y + 1, cell.x).and_then(set_next_cell_visible);
-            // }
-
-            // if cell.x != 0 {
-            //     self.get_cell(cell.y, cell.x - 1).and_then(set_next_cell_visible);
-            // }
-            // if cell.x != self.width {
-            //     self.get_cell(cell.y, cell.x + 1).and_then(set_next_cell_visible);
-            // }
         }
 
-        // None
-        // Some(cell)
+        if let Some(GridCellVariant::WithValue(0)) = variant_option {
+            if y_cord != 0 {
+                self.set_cell_visible(y_cord - 1, x_cord);
+            }
+            if y_cord != self.height {
+                self.set_cell_visible(y_cord + 1, x_cord);
+            }
+
+            if x_cord != 0 {
+                self.set_cell_visible(y_cord, x_cord - 1);
+            }
+            if x_cord != self.width {
+                self.set_cell_visible(y_cord, x_cord + 1);
+            }
+        }
+
+        variant_option
+    }
+
+    pub fn set_cell_tagged(&mut self, y_cord: usize, x_cord: usize) {
+        if let Some(cell) = self.get_cell(y_cord, x_cord) {
+            if GridCellState::Hidden == cell.state && GridCellVariant::NonExist != cell.variant {
+                cell.state = GridCellState::Tagged;
+            }
+        }
     }
     
 }
