@@ -7,6 +7,7 @@ type GridCellValueUnit = u8;
 pub enum GridCellState {
     Hidden,
     Tagged,
+    Questioned,
     Visible
 }
 
@@ -149,7 +150,10 @@ impl GridStruct {
         let mut variant_option = None;
         
         if let Some(cell) = self.get_cell(y_cord, x_cord) {
-            if GridCellState::Hidden == cell.state && GridCellVariant::NonExist != cell.variant {
+            if GridCellVariant::NonExist != cell.variant && (
+                GridCellState::Hidden == cell.state ||
+                GridCellState::Questioned == cell.state
+            ) {
                 cell.state = GridCellState::Visible;
                 variant_option = Some(cell.variant);
             }
@@ -187,6 +191,10 @@ impl GridStruct {
                         self.tagged_count += 1;
                     },
                     GridCellState::Tagged => {
+                        cell.state = GridCellState::Questioned;
+                        self.tagged_count -= 1;
+                    },
+                    GridCellState::Questioned => {
                         cell.state = GridCellState::Hidden;
                         self.tagged_count -= 1;
                     },

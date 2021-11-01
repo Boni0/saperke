@@ -42,21 +42,24 @@ fn test_render(game: &GameStruct) {
         line_idx += 1;
 
         for grid_cell in grid_line_vec {
-            let print_value = match grid_cell.state {
-                GridCellState::Visible => {
-                    match grid_cell.variant {
-                        GridCellVariant::WithValue(value) => value.to_string(),
-                        GridCellVariant::WithBomb => String::from("B"),
-                        GridCellVariant::NonExist => String::from("X"),
+            let print_value = match grid_cell.variant {
+                GridCellVariant::NonExist => String::from("X"),
+                _ => {
+                    match grid_cell.state {
+                        GridCellState::Hidden => String::from("#"),
+                        GridCellState::Tagged => String::from("!"),
+                        GridCellState::Questioned => String::from("?"),
+                        GridCellState::Visible => {
+                            match grid_cell.variant {
+                                GridCellVariant::WithValue(value) => if value == 0 {
+                                    String::from(" ")
+                                } else { value.to_string() },
+                                GridCellVariant::WithBomb => String::from("B"),
+                                _ => String::from("#")
+                            }
+                        },
                     }
-                },
-                GridCellState::Hidden => {
-                    match grid_cell.variant {
-                        GridCellVariant::NonExist => String::from("X"),
-                        _ => String::from("#")
-                    }
-                },
-                GridCellState::Tagged => String::from("?")
+                }
             };
 
             print!(" {} ", print_value);
