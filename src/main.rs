@@ -1,7 +1,7 @@
 mod game;
 mod grid;
 
-use grid::{GridStruct, GridCellVariant, GridCellState};
+use grid::{GridCellVariant, GridCellState};
 use game::{GameStruct, GameState, GameEndState};
 
 use std::{io};
@@ -162,7 +162,7 @@ fn main() {
                 }
             },
             "T" => {
-                game.grid.toggle_cell_tagged(y, x);
+                game.grid.toggle_cell_tagged_state(y, x);
             },
             _ => {
                 println!("HEH");

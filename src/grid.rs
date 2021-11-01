@@ -182,7 +182,7 @@ impl GridStruct {
         variant_option
     }
 
-    pub fn toggle_cell_tagged(&mut self, y_cord: usize, x_cord: usize) {
+    pub fn toggle_cell_tagged_state(&mut self, y_cord: usize, x_cord: usize) {
         if let Some(cell) = self.get_cell(y_cord, x_cord) {
             if GridCellVariant::NonExist != cell.variant {
                 match cell.state {
