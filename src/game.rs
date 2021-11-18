@@ -34,7 +34,8 @@ impl GameStruct {
             grid,
             mines_count: test_mines,
             timer_sec: Arc::new(Mutex::new(0)),
-            state: GameState::NotStarted
+            // state: GameState::NotStarted
+            state: GameState::Started
         }
     }
 
