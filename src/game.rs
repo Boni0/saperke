@@ -1,12 +1,15 @@
 use crate::grid::GridStruct;
-use std::{sync, thread::{self, JoinHandle}, time};
+use std::{sync};
 use sync::{Arc, Mutex};
+use druid::{Data, Lens};
 
+#[derive(Clone, PartialEq, Data)]
 pub enum GameEndState {
     Loss,
     Win
 }
 
+#[derive(Clone, Data)]
 pub enum GameState {
     NotStarted,
     Started,
@@ -14,6 +17,7 @@ pub enum GameState {
     EndState(GameEndState)
 }
 
+#[derive(Clone, Data, Lens)]
 pub struct GameStruct {
     pub grid: GridStruct,
     pub mines_count: usize,

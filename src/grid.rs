@@ -1,9 +1,12 @@
 use rand::prelude::*;
 
-type GridShapeVec = Vec<Vec<GridCell>>;
+use druid::im::{Vector};
+use druid::{Data, Lens};
+
+type GridShapeVec = Vector<Vector<GridCell>>;
 type GridCellValueUnit = u8;
 
-#[derive(PartialEq)]
+#[derive(PartialEq, Data, Clone)]
 pub enum GridCellState {
     Hidden,
     Tagged,
@@ -11,13 +14,14 @@ pub enum GridCellState {
     Visible
 }
 
-#[derive(Clone, Copy, PartialEq)]
+#[derive(Clone, Data, Copy, PartialEq)]
 pub enum GridCellVariant {
     WithValue(GridCellValueUnit),
     WithBomb,
     NonExist
 }
 
+#[derive(Clone, PartialEq, Data, Lens)]
 pub struct GridCell {
     pub x: usize,
     pub y: usize,
@@ -25,11 +29,13 @@ pub struct GridCell {
     pub variant: GridCellVariant,
 }
 
+#[derive(Clone, PartialEq, Data)]
 pub enum GridShape {
     RectangleOrSquare,
     Unusual
 }
 
+#[derive(Clone, Data, Lens)]
 pub struct GridStruct {
     pub width: usize,
     pub height: usize,
@@ -42,13 +48,13 @@ pub struct GridStruct {
 
 impl GridStruct {
     pub fn new_rectangle_or_square_grid(height: usize, width: usize) -> GridStruct {
-        let mut cells: GridShapeVec = Vec::new();
+        let mut cells: GridShapeVec = Vector::new();
 
         for x in 0..width {
-            let mut shape_vec_height: Vec<GridCell> = Vec::new();
+            let mut shape_vec_height: Vector<GridCell> = Vector::new();
 
             for y in 0..height {
-                shape_vec_height.push(
+                shape_vec_height.push_back(
                     GridCell { 
                         x,
                         y,
@@ -58,7 +64,7 @@ impl GridStruct {
                 );
             }
             
-            cells.push(shape_vec_height);
+            cells.push_back(shape_vec_height);
         }
 
         GridStruct { 
