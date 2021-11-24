@@ -1,0 +1,16 @@
+<svg width="689" height="692" viewBox="0 0 689 692" fill="none" xmlns="http://www.w3.org/2000/svg">
+    <rect x="209" y="210" width="107" height="107" fill="white"/>
+    <path fill-rule="evenodd" clip-rule="evenodd" d="M529 159H159V529H529V159ZM316 211H209V318H316V211Z" fill="black"/>
+    <path d="M209 110H479V160H209V110Z" fill="black"/>
+    <path d="M0 317H110V370H0V317Z" fill="black"/>
+    <path d="M579 317H689V370H579V317Z" fill="black"/>
+    <path d="M370 0V110H317V0H370Z" fill="black"/>
+    <path d="M579 109V159H529V109H579Z" fill="black"/>
+    <path d="M159 109V159H109V109H159Z" fill="black"/>
+    <path d="M159 529V579H109V529H159Z" fill="black"/>
+    <path d="M579 529V579H529V529H579Z" fill="black"/>
+    <path d="M370 582V692H317V582H370Z" fill="black"/>
+    <path d="M209 529H479V582H209V529Z" fill="black"/>
+    <path d="M579 209V479H529V209H579Z" fill="black"/>
+    <path d="M160 209V479H110V209H160Z" fill="black"/>
+</svg>

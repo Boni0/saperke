@@ -1,38 +1,38 @@
 mod grid;
 mod game;
 mod renderer;
+mod assets;
 mod test_console_render;
 
-use druid::{AppLauncher, PlatformError, Widget, WidgetExt, WindowDesc};
-use druid::widget::{List, SizedBox};
+use druid::{AppLauncher, PlatformError, Widget, WindowDesc, Lens, Data};
 
-use game::{GameStruct};
-use grid::{GridStruct};
+use game::Game;
+use renderer::GridRenderer;
+use assets::SvgAssets;
 
-use renderer::{FragmentBox};
+#[derive(Clone, Data, Lens)]
+pub struct AppStruct {
+    pub game: Game,
+    pub assets: SvgAssets
+}
 
-fn build_ui() -> impl Widget<GameStruct> {
-    SizedBox::new(
-        List::new(|| {
-            List::new(|| {
-                FragmentBox::new(|cell, _| {
-                    renderer::create_cell(cell)
-                })
-            })
-            .horizontal()
-        })
-        .lens(GridStruct::cells)
-    )
-    .lens(GameStruct::grid)
+fn build_ui() -> impl Widget<AppStruct> {
+    // let svg_assets = SvgAssets::collect();
+    GridRenderer::create()
 }
 
 fn main() -> Result<(), PlatformError> {
-    let game = GameStruct::new();
+    let mut app = AppStruct {
+        game: Game::new(),
+        assets: SvgAssets::init()
+    };
 
     AppLauncher::with_window(
-        WindowDesc::new(build_ui )
+        WindowDesc
+            ::new(build_ui )
             .title("Saperke")
     )
-        .launch(game)?;
+        .launch(app)?;
+
     Ok(())
 }

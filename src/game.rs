@@ -18,15 +18,15 @@ pub enum GameState {
 }
 
 #[derive(Clone, Data, Lens)]
-pub struct GameStruct {
+pub struct Game {
     pub grid: GridStruct,
     pub mines_count: usize,
     pub timer_sec: Arc<Mutex<usize>>,
     pub state: GameState
 }
 
-impl GameStruct {
-    pub fn new() -> GameStruct {
+impl Game {
+    pub fn new() -> Game {
         let test_width: usize = 10;
         let test_height: usize = 10;
         let test_mines: usize = 7;
@@ -34,7 +34,7 @@ impl GameStruct {
         let mut grid = GridStruct::new_rectangle_or_square_grid(test_height, test_width);
         grid.set_mines_to_cells_randomly(test_mines);
 
-        GameStruct {
+        Game {
             grid,
             mines_count: test_mines,
             timer_sec: Arc::new(Mutex::new(0)),

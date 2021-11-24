@@ -1,48 +1,59 @@
-use druid::{Env, Event, EventCtx, Widget, WidgetExt};
-use druid::widget::{Painter, Controller, Svg, SvgData};
+mod controllers;
 
-use crate::grid::{GridCell, GridCellState};
-mod fragment;
+pub mod GridRenderer {
+    use druid::{Env, Lens, LensExt, Widget, WidgetExt, WidgetId, lens};
+    use druid::widget::{SizedBox, List, Flex, Svg, SvgData, Painter, Label, LensWrap, LensScopeTransfer, ViewSwitcher};
 
-pub use fragment::{FragmentBox};
+    use crate::assets::SvgAssets;
+    use crate::game::{Game};
+    use crate::{AppStruct};
+    use crate::grid::{GridCell, GridStruct, GridCellState, GridCellVariant};
 
-struct RightClick;
-impl<T, W: Widget<T>> Controller<T, W> for RightClick {
-    fn event(&mut self, child: &mut W, ctx: &mut EventCtx, event: &Event, data: &mut T, env: &Env) {
-        // TODO: add right click (bomb) hanler
-        child.event(ctx, event, data, env)
+    pub fn create() -> impl Widget<AppStruct> {
+        ViewSwitcher::new(
+            |data: &AppStruct, _| Clone::clone(&data.assets),
+            |svg_assets, data, _| {
+                let mut flex = Flex::column();
+
+                for row in  data.game.grid.cells.iter() {
+                    let mut flex_row = Flex::row();
+
+                    for cell_iter in row {
+                        let cell: &GridCell = cell_iter;
+                        flex_row.add_child(self::create_cell(cell, svg_assets));
+                    }
+
+                    flex.add_child(flex_row);
+                } 
+
+                flex.center().boxed()
+            }
+        )
     }
-}
 
-pub fn create_cell(cell: &GridCell) -> Box<dyn Widget<GridCell>> {
-    let tile_unopened = include_str!("../assets/tiles/unopened.svg")
-        .parse::<SvgData>()
-        .unwrap_or(SvgData::default());
-    let tile_unopened_svg = Svg::new(tile_unopened);
+    fn create_cell(cell: &GridCell, svg_assets: &SvgAssets) -> impl Widget<AppStruct> {
+        let svg = match cell.variant {
+            GridCellVariant::WithValue(value) => {
+                if value == 0 {
+                    SvgData::default()
+                } else {
+                    svg_assets.get(value.to_string().as_str())
+                }
+            },
+            GridCellVariant::WithBomb => svg_assets.get("bomb"),
+            GridCellVariant::NonExist => SvgData::default(),
+        };
 
-    let tile_opened = include_str!("../assets/tiles/opened.svg")
-        .parse::<SvgData>()
-        .unwrap_or(SvgData::default());
-    let tile_opened_svg = Svg::new(tile_opened);
-
-    let mut active_tile_svg = match cell.state {
-        GridCellState::Hidden => tile_unopened_svg,
-        _ => tile_opened_svg,
-    };
-
-    let _num_1 = include_str!("../assets/numbers/1.svg")
-        .parse::<SvgData>()
-        .unwrap_or(SvgData::default());
-
-    let box_painter = Painter::new(move |ctx, _data, env| {
-        active_tile_svg.paint(ctx, _data, env);
-    }); 
-
-    Svg::new(SvgData::empty())
-        .lens(GridCell::state)
-        .fix_size(23.0, 23.0)
-        .background(box_painter)
-        .controller(RightClick)
-        .on_click(|_, _, _| ()) // has to be to update into hot or active
-        .boxed()
+        let mut bg = Svg::new(svg_assets.get("opened"));
+    
+        let box_painter = Painter::new(move |ctx, _data, env| {
+            bg.paint(ctx, _data, env);
+        }); 
+    
+        Svg::new(svg)
+            .fix_size(23.0, 23.0)
+            .background(box_painter)
+            // .controller(ClickController)
+            // .on_click(|_, _, _| ()) // has to be to update into hot or active
+    }
 }

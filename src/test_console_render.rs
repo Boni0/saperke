@@ -1,9 +1,9 @@
 use crate::grid::{GridCellVariant, GridCellState};
-use crate::game::{GameStruct, GameState, GameEndState};
+use crate::game::{Game, GameState, GameEndState};
 
 use std::{io};
 
-fn test_render(game: &GameStruct) {
+fn test_render(game: &Game) {
     // Clean
     print!("\x1B[2J\x1B[1;1H");
 
@@ -128,7 +128,7 @@ fn test_input_type() -> String {
 }
 
 pub fn init_game_console() {
-    let mut game = GameStruct::new();
+    let mut game = Game::new();
 
     loop {
         test_render(&game);
