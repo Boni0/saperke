@@ -3,14 +3,15 @@ use rand::prelude::*;
 use druid::im::{Vector};
 use druid::{Data, Lens};
 
-type GridShapeVec = Vector<Vector<GridCell>>;
-type GridCellValueUnit = u8;
+pub type GridShapeVec = Vector<Vector<GridCell>>;
+pub type GridCellValueUnit = u8;
 
 #[derive(PartialEq, Data, Clone)]
 pub enum GridCellState {
     Hidden,
     Tagged,
     Questioned,
+    Clicked,
     Visible
 }
 

@@ -45,7 +45,6 @@ fn test_render(game: &Game) {
                     match grid_cell.state {
                         GridCellState::Hidden => String::from("#"),
                         GridCellState::Tagged => String::from("!"),
-                        GridCellState::Questioned => String::from("?"),
                         GridCellState::Visible => {
                             match grid_cell.variant {
                                 GridCellVariant::WithValue(value) => if value == 0 {
@@ -55,6 +54,7 @@ fn test_render(game: &Game) {
                                 _ => String::from("#")
                             }
                         },
+                        GridCellState::Questioned | _ => String::from("?"),
                     }
                 }
             };

@@ -17,12 +17,11 @@ pub struct AppStruct {
 }
 
 fn build_ui() -> impl Widget<AppStruct> {
-    // let svg_assets = SvgAssets::collect();
-    GridRenderer::create()
+    GridRenderer::render()
 }
 
 fn main() -> Result<(), PlatformError> {
-    let mut app = AppStruct {
+    let app = AppStruct {
         game: Game::new(),
         assets: SvgAssets::init()
     };
