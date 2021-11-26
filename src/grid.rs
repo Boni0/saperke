@@ -11,7 +11,7 @@ pub enum GridCellState {
     Hidden,
     Tagged,
     Questioned,
-    Clicked,
+    Active,
     Visible
 }
 
