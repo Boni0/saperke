@@ -1,58 +1,39 @@
+mod cell;
+mod shape;
+
 use rand::prelude::*;
 
-use druid::im::{Vector};
+use druid::im::Vector;
 use druid::{Data, Lens};
 
-pub type GridShapeVec = Vector<Vector<GridCell>>;
-pub type GridCellValueUnit = u8;
+pub use cell::{
+    GridCell,
+    GridCellMatrix,
+    GridCellMatrixRow,
+    GridCellState,
+    GridCellVariant,
+    GridCellValueUnit
+};
 
-#[derive(PartialEq, Data, Clone)]
-pub enum GridCellState {
-    Hidden,
-    Tagged,
-    Questioned,
-    Active,
-    Visible
-}
-
-#[derive(Clone, Data, Copy, PartialEq)]
-pub enum GridCellVariant {
-    WithValue(GridCellValueUnit),
-    WithBomb,
-    NonExist
-}
-
-#[derive(Clone, PartialEq, Data, Lens)]
-pub struct GridCell {
-    pub x: usize,
-    pub y: usize,
-    pub state: GridCellState,
-    pub variant: GridCellVariant,
-}
-
-#[derive(Clone, PartialEq, Data)]
-pub enum GridShape {
-    RectangleOrSquare,
-    Unusual
-}
+pub use shape::GridShape;
 
 #[derive(Clone, Data, Lens)]
-pub struct GridStruct {
+pub struct Grid {
     pub width: usize,
     pub height: usize,
-    pub shape_type: GridShape, // rename to GridShapeType
-    pub cells: GridShapeVec, 
+    pub shape_type: GridShape,
+    pub cells: GridCellMatrix, 
     pub cells_count: usize,
     pub tagged_count: usize,
     pub visible_count: usize
 }
 
-impl GridStruct {
-    pub fn new_rectangle_or_square_grid(height: usize, width: usize) -> GridStruct {
-        let mut cells: GridShapeVec = Vector::new();
+impl Grid {
+    pub fn new_rectangle_or_square_grid(height: usize, width: usize) -> Grid {
+        let mut cells: GridCellMatrix = Vector::new();
 
         for x in 0..width {
-            let mut shape_vec_height: Vector<GridCell> = Vector::new();
+            let mut shape_vec_height: GridCellMatrixRow = Vector::new();
 
             for y in 0..height {
                 shape_vec_height.push_back(
@@ -68,7 +49,7 @@ impl GridStruct {
             cells.push_back(shape_vec_height);
         }
 
-        GridStruct { 
+        Grid { 
             width,
             height,
             shape_type: GridShape::RectangleOrSquare,
@@ -79,7 +60,16 @@ impl GridStruct {
         }
     }
 
-    pub fn get_cell(&mut self, y_cord: usize, x_cord: usize) -> Option<&mut GridCell> {
+    pub fn get_cell(&mut self, y_cord: usize, x_cord: usize) -> Option<&GridCell> {
+        match self.cells.get(y_cord) {
+            Some(row) => {
+                row.get(x_cord)
+            },
+            None => { None },
+        }
+    }
+
+    pub fn get_cell_mut(&mut self, y_cord: usize, x_cord: usize) -> Option<&mut GridCell> {
         match self.cells.get_mut(y_cord) {
             Some(row) => {
                 row.get_mut(x_cord)
@@ -106,7 +96,7 @@ impl GridStruct {
                 mine_y = random_cell / self.height;
                 mine_x = random_cell % self.height;
 
-                cell = self.get_cell(mine_y, mine_x).unwrap();
+                cell = self.get_cell_mut(mine_y, mine_x).unwrap();
 
                 match cell.variant {
                     GridCellVariant::WithValue(_) => break,
@@ -136,7 +126,7 @@ impl GridStruct {
 
                     if search_y == mine_y && search_x == mine_x { continue; }
 
-                    let neighbor_cell = match self.get_cell(search_y, search_x) {
+                    let neighbor_cell = match self.get_cell_mut(search_y, search_x) {
                         Some(cell) => { cell },
                         None => { continue; },
                     };
@@ -156,7 +146,7 @@ impl GridStruct {
     pub fn set_cell_visible(&mut self, y_cord: usize, x_cord: usize) -> Option<GridCellVariant> {
         let mut variant_option = None;
         
-        if let Some(cell) = self.get_cell(y_cord, x_cord) {
+        if let Some(cell) = self.get_cell_mut(y_cord, x_cord) {
             if GridCellVariant::NonExist != cell.variant && (
                 GridCellState::Hidden == cell.state ||
                 GridCellState::Questioned == cell.state
@@ -190,7 +180,7 @@ impl GridStruct {
     }
 
     pub fn toggle_cell_tagged_state(&mut self, y_cord: usize, x_cord: usize) {
-        if let Some(cell) = self.get_cell(y_cord, x_cord) {
+        if let Some(cell) = self.get_cell_mut(y_cord, x_cord) {
             if GridCellVariant::NonExist != cell.variant {
                 match cell.state {
                     GridCellState::Hidden => {

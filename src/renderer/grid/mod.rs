@@ -5,10 +5,10 @@ use std::str::FromStr;
 use druid::{LensExt, Widget, WidgetExt, lens};
 use druid::widget::{List, Painter, Svg, SvgData};
 
-use crate::game::Game;
 use crate::assets::{TILE_OPENED_BG, TILE_UNOPENED_BG};
 use crate::AppStruct;
-use crate::grid::{GridCell, GridCellState, GridStruct};
+use crate::game::Game;
+use crate::grid::{GridCell, GridCellState, Grid};
 
 use controllers::GridCellController;
 
@@ -25,7 +25,7 @@ impl GridRenderer {
         .lens(
             lens!(AppStruct, game)
                 .then(lens!(Game, grid))
-                .then(lens!(GridStruct, cells))
+                .then(lens!(Grid, cells))
         )
     }
 
