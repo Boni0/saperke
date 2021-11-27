@@ -60,19 +60,19 @@ impl Grid {
         }
     }
 
-    pub fn get_cell(&mut self, y_cord: usize, x_cord: usize) -> Option<&GridCell> {
-        match self.cells.get(y_cord) {
+    pub fn get_cell(&mut self, point: GridCellPoint) -> Option<&GridCell> {
+        match self.cells.get(point.y) {
             Some(row) => {
-                row.get(x_cord)
+                row.get(point.x)
             },
             None => { None },
         }
     }
 
-    pub fn get_cell_mut(&mut self, y_cord: usize, x_cord: usize) -> Option<&mut GridCell> {
-        match self.cells.get_mut(y_cord) {
+    pub fn get_cell_mut(&mut self, point: GridCellPoint) -> Option<&mut GridCell> {
+        match self.cells.get_mut(point.y) {
             Some(row) => {
-                row.get_mut(x_cord)
+                row.get_mut(point.x)
             },
             None => { None },
         }
@@ -81,7 +81,7 @@ impl Grid {
     pub fn set_mines_to_cells_randomly(&mut self, mines_count: usize) {
         let mut rng = rand::thread_rng();
         let mines_count = if mines_count > self.cells_count {
-            self.cells_count
+            self.cells_count - 1
         } else {
             mines_count
         };
@@ -96,7 +96,7 @@ impl Grid {
                 mine_y = random_cell / self.height;
                 mine_x = random_cell % self.height;
 
-                cell = self.get_cell_mut(mine_y, mine_x).unwrap();
+                cell = self.get_cell_mut(GridCellPoint { y: mine_y, x: mine_x }).unwrap();
 
                 match cell.variant {
                     GridCellVariant::WithValue(_) => break,
@@ -126,7 +126,7 @@ impl Grid {
 
                     if search_y == mine_y && search_x == mine_x { continue; }
 
-                    let neighbor_cell = match self.get_cell_mut(search_y, search_x) {
+                    let neighbor_cell = match self.get_cell_mut(GridCellPoint { x: search_x, y: search_y }) {
                         Some(cell) => { cell },
                         None => { continue; },
                     };
@@ -143,13 +143,14 @@ impl Grid {
         }
     }
 
-    pub fn set_cell_visible(&mut self, y_cord: usize, x_cord: usize) -> Option<GridCellVariant> {
+    pub fn set_cell_visible(&mut self, point: GridCellPoint) -> Option<GridCellVariant> {
+        let GridCellPoint { y: y_cord, x: x_cord } = point;
         let mut variant_option = None;
         
-        if let Some(cell) = self.get_cell_mut(y_cord, x_cord) {
+        if let Some(cell) = self.get_cell_mut(point) {
             if GridCellVariant::NonExist != cell.variant && (
                 GridCellState::Hidden == cell.state ||
-                GridCellState::Questioned == cell.state
+                GridCellState::Active == cell.state
             ) {
                 cell.state = GridCellState::Visible;
                 variant_option = Some(cell.variant);
@@ -161,17 +162,29 @@ impl Grid {
 
             if GridCellVariant::WithValue(0) == variant {
                 if y_cord != 0 {
-                    self.set_cell_visible(y_cord - 1, x_cord);
+                    self.set_cell_visible(GridCellPoint {
+                        y: y_cord - 1, 
+                        x: x_cord
+                    });
                 }
                 if y_cord != self.height {
-                    self.set_cell_visible(y_cord + 1, x_cord);
+                    self.set_cell_visible(GridCellPoint {
+                        y: y_cord + 1, 
+                        x: x_cord
+                    });
                 }
     
                 if x_cord != 0 {
-                    self.set_cell_visible(y_cord, x_cord - 1);
+                    self.set_cell_visible(GridCellPoint {
+                        y: y_cord, 
+                        x: x_cord - 1
+                    });
                 }
                 if x_cord != self.width {
-                    self.set_cell_visible(y_cord, x_cord + 1);
+                    self.set_cell_visible(GridCellPoint {
+                        y: y_cord, 
+                        x: x_cord + 1
+                    });
                 }
             }
         }
@@ -179,8 +192,8 @@ impl Grid {
         variant_option
     }
 
-    pub fn toggle_cell_tagged_state(&mut self, y_cord: usize, x_cord: usize) {
-        if let Some(cell) = self.get_cell_mut(y_cord, x_cord) {
+    pub fn toggle_cell_tagged_state(&mut self, point: GridCellPoint) {
+        if let Some(cell) = self.get_cell_mut(point) {
             if GridCellVariant::NonExist != cell.variant {
                 match cell.state {
                     GridCellState::Hidden => {

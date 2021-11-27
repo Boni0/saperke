@@ -5,10 +5,18 @@ use std::str::FromStr;
 use druid::{LensExt, Widget, WidgetExt, lens};
 use druid::widget::{List, Painter, Svg, SvgData};
 
-use crate::assets::{TILE_OPENED_BG, TILE_UNOPENED_BG};
+use crate::assets::{
+    EMPTY_SVG_BG, 
+    NUMS_SVG_BG_ARRAY, 
+    TILE_OPENED_SVG_BG, 
+    TILE_UNOPENED_SVG_BG,
+    BOMB_SIGN_SVG_BG,
+    FLAG_SIGN_SVG_BG,
+    QUESTION_MARK_SIGN_SVG_BG
+};
 use crate::app::AppState;
 use crate::game::Game;
-use crate::grid::{GridCell, GridCellState, Grid};
+use crate::grid::{GridCell, GridCellState, Grid, GridCellVariant};
 
 use controllers::GridCellController;
 
@@ -31,18 +39,34 @@ impl GridWidget {
 
     fn create_cell_test() -> impl Widget<GridCell> {
         let brush = Painter::new(move |ctx, cell: &GridCell, env| {
-            Svg::new(
-                SvgData::from_str(
-                    match cell.state {
-                        GridCellState::Active | GridCellState::Visible => TILE_OPENED_BG,
-                        _ => TILE_UNOPENED_BG,
+            let cell_bg = SvgData::from_str(
+                match cell.state {
+                    GridCellState::Active | GridCellState::Visible => TILE_OPENED_SVG_BG,
+                    _ => TILE_UNOPENED_SVG_BG,
+                }
+            )
+            .unwrap_or(SvgData::empty());
+
+            Svg::new(cell_bg).paint(ctx, cell, env);
+
+            let cell_value = SvgData::from_str(match cell.state {
+                GridCellState::Tagged => FLAG_SIGN_SVG_BG,
+                GridCellState::Questioned => QUESTION_MARK_SIGN_SVG_BG,
+                GridCellState::Visible => {
+                    match cell.variant {
+                        GridCellVariant::WithValue(value) => NUMS_SVG_BG_ARRAY[value as usize],
+                        GridCellVariant::WithBomb => BOMB_SIGN_SVG_BG,
+                        GridCellVariant::NonExist => EMPTY_SVG_BG,
                     }
-                )
-                .unwrap_or(SvgData::empty())
-            ).paint(ctx, cell, env);
+                },
+                _ => EMPTY_SVG_BG
+            })
+            .unwrap_or(SvgData::empty());
+
+            Svg::new(cell_value).paint(ctx, cell, env);
         }); 
 
-        Svg::new(SvgData::default())
+        Svg::new(SvgData::empty())
             .fix_size(23.0, 23.0)
             .background(brush)
             .controller(GridCellController)

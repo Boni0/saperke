@@ -1,12 +1,11 @@
 use druid::{AppDelegate, Command, DelegateCtx, Env, Handled, Target, Selector};
 
 use crate::app::AppState;
-use crate::game::GameState;
-use crate::grid::{GridCellPoint, GridCellState};
+use crate::game::{GameState, GameEndState};
+use crate::grid::{GridCellPoint, GridCellState, GridCellVariant};
 
-pub const CHANGE_GRID_CELL_STATE: Selector<(GridCellPoint, GridCellState)> = Selector::new("grid.active.set");
-// pub const SET_GRID_CELL_TAGGED: Selector = Selector::new("grid.tagged.set");
-// pub const SET_GRID_CELLS_VISIBLE: Selector = Selector::new("grid.visible.set");
+pub const CHANGE_GRID_CELL_STATE: Selector<(GridCellPoint, GridCellState)> = Selector::new("grid.state.set");
+pub const SET_GRID_CELLS_VISIBLE: Selector<GridCellPoint> = Selector::new("grid.visible.set");
 
 pub struct MainDelegate;
 
@@ -24,9 +23,25 @@ impl AppDelegate<AppState> for MainDelegate {
                 state
                     .game
                     .grid
-                    .get_cell_mut(point.y, point.x)
+                    .get_cell_mut(point.clone())
                     .and_then(|cell| {
                         cell.state = new_state.clone();
+                        Some(())
+                    });
+
+                return Handled::Yes
+            }
+
+            if let Some(point) = cmd.get(SET_GRID_CELLS_VISIBLE) {
+                state
+                    .game
+                    .grid
+                    .set_cell_visible(point.clone())
+                    .and_then(|variant| {
+                        if variant == GridCellVariant::WithBomb {
+                            state.game.state = GameState::EndState(GameEndState::Loss);
+                        }
+
                         Some(())
                     });
 
