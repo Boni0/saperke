@@ -6,24 +6,24 @@ use druid::{LensExt, Widget, WidgetExt, lens};
 use druid::widget::{List, Painter, Svg, SvgData};
 
 use crate::assets::{TILE_OPENED_BG, TILE_UNOPENED_BG};
-use crate::AppStruct;
+use crate::app::AppState;
 use crate::game::Game;
 use crate::grid::{GridCell, GridCellState, Grid};
 
 use controllers::GridCellController;
 
-pub struct GridRenderer;
+pub struct GridWidget;
 
-impl GridRenderer {
-    pub fn render() -> impl Widget<AppStruct> {
+impl GridWidget {
+    pub fn new() -> impl Widget<AppState> {
         List::new(|| {
             List::new(|| {
-                GridRenderer::create_cell_test()
+                GridWidget::create_cell_test()
             })
             .horizontal()
         })
         .lens(
-            lens!(AppStruct, game)
+            lens!(AppState, game)
                 .then(lens!(Game, grid))
                 .then(lens!(Grid, cells))
         )

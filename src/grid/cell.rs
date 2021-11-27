@@ -6,6 +6,12 @@ pub type GridCellValueUnit = u8;
 pub type GridCellMatrixRow = Vector<GridCell>;
 pub type GridCellMatrix = Vector<GridCellMatrixRow>;
 
+#[derive(Clone, PartialEq, Data, Lens)]
+pub struct GridCellPoint {
+    pub x: usize,
+    pub y: usize,
+}
+
 #[derive(PartialEq, Data, Clone)]
 pub enum GridCellState {
     Hidden,
@@ -24,8 +30,7 @@ pub enum GridCellVariant {
 
 #[derive(Clone, PartialEq, Data, Lens)]
 pub struct GridCell {
-    pub x: usize,
-    pub y: usize,
+    pub point: GridCellPoint,
     pub state: GridCellState,
     pub variant: GridCellVariant,
 }

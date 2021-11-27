@@ -1,37 +1,31 @@
 mod grid;
 mod game;
-mod renderer;
+mod ui;
 mod assets;
-// mod test_console_render;
+mod app;
+mod delegate;
 
-use druid::{AppLauncher, PlatformError, Widget, WidgetExt, WindowDesc, Lens, Data};
+use druid::{AppLauncher, PlatformError, Widget, WindowDesc, WidgetExt};
 use druid::widget::Flex;
 
+use app::AppState;
 use game::Game;
-use renderer::GridRenderer;
+use ui::GridWidget;
+use delegate::MainDelegate;
 
-#[derive(Clone, Data, Lens)]
-pub struct AppStruct {
-    pub game: Game,
-}
-
-fn build_ui() -> impl Widget<AppStruct> {
+fn build_ui() -> impl Widget<AppState> {
     let mut flex = Flex::column();
-    flex.add_child(GridRenderer::render());
+    flex.add_child(GridWidget::new());
     flex.center()
 }
 
 fn main() -> Result<(), PlatformError> {
-    let app = AppStruct {
-        game: Game::new(),
-    };
+    let window = WindowDesc::new(build_ui ).title("Saperke");
+    let state = AppState { game: Game::new() };
 
-    AppLauncher::with_window(
-        WindowDesc
-            ::new(build_ui )
-            .title("Saperke")
-    )
-        .launch(app)?;
+    AppLauncher::with_window(window)
+        .delegate(MainDelegate)
+        .launch(state)?;
 
     Ok(())
 }

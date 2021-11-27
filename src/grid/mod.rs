@@ -8,6 +8,7 @@ use druid::{Data, Lens};
 
 pub use cell::{
     GridCell,
+    GridCellPoint,
     GridCellMatrix,
     GridCellMatrixRow,
     GridCellState,
@@ -32,14 +33,13 @@ impl Grid {
     pub fn new_rectangle_or_square_grid(height: usize, width: usize) -> Grid {
         let mut cells: GridCellMatrix = Vector::new();
 
-        for x in 0..width {
+        for y in 0..height {
             let mut shape_vec_height: GridCellMatrixRow = Vector::new();
 
-            for y in 0..height {
+            for x in 0..width {
                 shape_vec_height.push_back(
                     GridCell { 
-                        x,
-                        y,
+                        point: GridCellPoint { x, y },
                         state: GridCellState::Hidden, 
                         variant: GridCellVariant::WithValue(0) 
                     }

@@ -32,7 +32,7 @@ impl Game {
             mines_count: test_mines,
             // timer_sec: Arc::new(Mutex::new(0)),
             // state: GameState::NotStarted
-            state: GameState::Started
+            state: GameState::Running
         }
     }
 }

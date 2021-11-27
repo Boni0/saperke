@@ -6,10 +6,10 @@ pub enum GameEndState {
     Win
 }
 
-#[derive(Clone, Data)]
+#[derive(Clone, Data, PartialEq)]
 pub enum GameState {
     NotStarted,
-    Started,
+    Running,
     Paused,
     EndState(GameEndState)
 }
