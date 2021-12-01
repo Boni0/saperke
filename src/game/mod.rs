@@ -1,8 +1,11 @@
 mod state;
 
-use crate::grid::Grid;
-// use std::{sync};
-// use sync::{Arc, Mutex};
+use crate::grid::{
+    Grid,
+    GridSize,
+    GridShape,
+    GridBombsConfig
+};
 use druid::{Data, Lens};
 
 pub use state::{
@@ -13,8 +16,6 @@ pub use state::{
 #[derive(Clone, Data, Lens)]
 pub struct Game {
     pub grid: Grid,
-    pub mines_count: usize,
-    // pub timer_sec: Arc<Mutex<usize>>,
     pub state: GameState
 }
 
@@ -24,14 +25,17 @@ impl Game {
         let test_height: usize = 10;
         let test_mines: usize = 7;
 
-        let mut grid = Grid::new_rectangle_or_square_grid(test_height, test_width);
-        grid.set_mines_to_cells_randomly(test_mines);
+        let grid = Grid::new(
+            GridSize {
+                width: test_width,
+                height: test_height
+            },
+            GridShape::RectangleOrSquare,
+            &GridBombsConfig::Randomized(test_mines)
+        );
 
         Game {
             grid,
-            mines_count: test_mines,
-            // timer_sec: Arc::new(Mutex::new(0)),
-            // state: GameState::NotStarted
             state: GameState::Running
         }
     }

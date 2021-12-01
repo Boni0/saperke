@@ -3,7 +3,7 @@ mod controllers;
 use std::str::FromStr;
 
 use druid::{LensExt, Widget, WidgetExt, lens};
-use druid::widget::{List, Painter, Svg, SvgData};
+use druid::widget::{List, Painter, Svg, SvgData, Either};
 
 use crate::assets::{
     EMPTY_SVG_BG, 
@@ -16,7 +16,7 @@ use crate::assets::{
 };
 use crate::app::AppState;
 use crate::game::Game;
-use crate::grid::{GridCell, GridCellState, Grid, GridCellVariant};
+use crate::grid::{GridCell, GridCells, GridCellState, GridCellValue, Grid, GridCellVariant};
 
 use controllers::GridCellController;
 
@@ -26,7 +26,7 @@ impl GridWidget {
     pub fn new() -> impl Widget<AppState> {
         List::new(|| {
             List::new(|| {
-                GridWidget::create_cell_test()
+                GridWidget::cell()
             })
             .horizontal()
         })
@@ -34,41 +34,57 @@ impl GridWidget {
             lens!(AppState, game)
                 .then(lens!(Game, grid))
                 .then(lens!(Grid, cells))
+                .then(lens!(GridCells, matrix))
         )
     }
 
-    fn create_cell_test() -> impl Widget<GridCell> {
+    fn cell() -> impl Widget<GridCell> {
         let brush = Painter::new(move |ctx, cell: &GridCell, env| {
-            let cell_bg = SvgData::from_str(
-                match cell.state {
-                    GridCellState::Active | GridCellState::Visible => TILE_OPENED_SVG_BG,
-                    _ => TILE_UNOPENED_SVG_BG,
-                }
-            )
-            .unwrap_or(SvgData::empty());
+            if let GridCellVariant::Exist(cell_data) = &cell.variant {
 
-            Svg::new(cell_bg).paint(ctx, cell, env);
-
-            let cell_value = SvgData::from_str(match cell.state {
-                GridCellState::Tagged => FLAG_SIGN_SVG_BG,
-                GridCellState::Questioned => QUESTION_MARK_SIGN_SVG_BG,
-                GridCellState::Visible => {
-                    match cell.variant {
-                        GridCellVariant::WithValue(value) => NUMS_SVG_BG_ARRAY[value as usize],
-                        GridCellVariant::WithBomb => BOMB_SIGN_SVG_BG,
-                        GridCellVariant::NonExist => EMPTY_SVG_BG,
+                let cell_bg = SvgData::from_str(
+                    if cell_data.is_visible || cell_data.state == GridCellState::Active {
+                        TILE_OPENED_SVG_BG
+                    } else {
+                        TILE_UNOPENED_SVG_BG
                     }
-                },
-                _ => EMPTY_SVG_BG
-            })
-            .unwrap_or(SvgData::empty());
+                )
+                .unwrap_or(SvgData::empty());
+    
+                Svg::new(cell_bg).paint(ctx, cell, env);
+    
+                let cell_value = SvgData::from_str(match cell_data.state {
+                    GridCellState::Tagged => FLAG_SIGN_SVG_BG,
+                    GridCellState::Questioned => QUESTION_MARK_SIGN_SVG_BG,
+                    _ => {
+                        if cell_data.is_visible {
+                            match cell_data.value {
+                                GridCellValue::Number(value) => NUMS_SVG_BG_ARRAY[value as usize],
+                                GridCellValue::Bomb => BOMB_SIGN_SVG_BG,
+                            }
+                        }
+                        else {
+                            EMPTY_SVG_BG
+                        }
+                    }
+                })
+                .unwrap_or(SvgData::empty());
+    
+                Svg::new(cell_value).paint(ctx, cell, env);
 
-            Svg::new(cell_value).paint(ctx, cell, env);
+            }
         }); 
 
-        Svg::new(SvgData::empty())
-            .fix_size(23.0, 23.0)
-            .background(brush)
-            .controller(GridCellController)
+        Either::new(
+            |cell: &GridCell, _| cell.variant != GridCellVariant::NonExist, 
+            
+            Svg::new(SvgData::empty())
+                .fix_size(23.0, 23.0)
+                .background(brush)
+                .controller(GridCellController), 
+            
+            Svg::new(SvgData::empty())
+                .fix_size(23.0, 23.0)
+        )
     }
 }
