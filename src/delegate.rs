@@ -19,27 +19,32 @@ impl AppDelegate<AppState> for MainDelegate {
         state: &mut AppState,
         _env: &Env,
     ) -> Handled {
-        match state.game.state {
-            GameState::NotStarted | GameState::Running => {
-                if let Some(point) = cmd.get(HANDLE_CELL_OPEN) {
-                    state.game.handle_cell_open(point);
-                }
+        if 
+            state.game.state == GameState::NotStarted
+            || state.game.state == GameState::Running 
+        {
+            if let Some(point) = cmd.get(HANDLE_CELL_OPEN) {
+                state.game.handle_cell_open(point);
+                return Handled::Yes
+            }
 
-                if let Some((point, new_state)) = cmd.get(HANDLE_CELL_TOGGLE_HOVER) {
-                    if let Some(cell_data) = state.game.grid.cells.get_existing_cell(point) {
-                        if !cell_data.is_visible {
-                            cell_data.state = new_state.clone();
-                        }
+            if let Some((point, new_state)) = cmd.get(HANDLE_CELL_TOGGLE_HOVER) {
+                if let Some(cell_data) = state.game.grid.cells.get_existing_cell(point) {
+                    if !cell_data.is_visible {
+                        cell_data.state = new_state.clone();
                     }
                 }
+                return Handled::Yes
+            }
 
-                if let Some((point, option_flagged_state)) = cmd.get(HANDLE_CELL_FLAGGING) {
-                    state.game.grid.handle_cell_flagged_state(point, option_flagged_state.clone());
-                }
+            if let Some((point, option_flagged_state)) = cmd.get(HANDLE_CELL_FLAGGING) {
+                state.game.grid.handle_cell_flagged_state(point, option_flagged_state.clone());
+                return Handled::Yes
+            }
 
-                Handled::Yes
-            },
-            _ => Handled::No
         }
+
+        Handled::No
     }
+
 }
