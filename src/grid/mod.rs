@@ -16,6 +16,8 @@ pub use cells::{
     GridCellMatrix,
     GridCellMatrixRow,
     GridCellState,
+    GridCellOpenedState,
+    GridCellFlaggedState,
     GridCellVariant,
     GridCellValueUnit,
     GridExistingCell,
@@ -67,8 +69,9 @@ impl Grid {
             matrix: Grid::create_cells_matrix(&size, non_existing_points_option),
             all_count: size.height * size.width,
             exist_count,
-            tagged_count: 0,
             visible_count: 0,
+            tagged_points: Vector::new(),
+            questioned_points: Vector::new(),
         };
 
         let get_eligible_bombs_count = |check_amount: usize| {
@@ -132,8 +135,9 @@ impl Grid {
     }
 
     pub fn refresh(&mut self) {
-        self.cells.tagged_count = 0;
         self.cells.visible_count = 0;
+        self.cells.tagged_points = Vector::new();
+        self.cells.questioned_points = Vector::new();
 
         for row in self.cells.matrix.iter_mut() {
             for cell in (row as &mut GridCellMatrixRow).iter_mut() {
@@ -167,16 +171,28 @@ impl Grid {
         }
     }
 
-    pub fn set_cells_visible(&mut self, start_point: &GridCellPoint) -> Option<GridCellValue> {
+    pub fn get_existing_cell_mut(&mut self, point: &GridCellPoint) -> Option<&mut GridExistingCell> {
+        self
+            .get_cell_mut(point)
+            .and_then(|cell| {
+                match &mut cell.variant {
+                    GridCellVariant::NonExist => None,
+                    GridCellVariant::Exist(cell_data) => Some(cell_data),
+                }
+            })
+    }
+
+    pub fn set_idle_cells_visible(&mut self, start_point: &GridCellPoint) -> Option<GridCellValue> {
         let GridCellPoint { y: y_cord, x: x_cord } = *start_point;
         let mut start_point_cell_value_option = None;
-        
-        if let Some(cell) = self.get_cell_mut(start_point) {
-            if let GridCellVariant::Exist(cell_data) = &mut cell.variant {
-                if !cell_data.is_visible {
-                    cell_data.is_visible = true;
-                    start_point_cell_value_option = Some(cell_data.value);
-                }
+
+        if let Some(cell_data) = self.get_existing_cell_mut(start_point) {
+            if 
+                cell_data.is_visible == false
+                && cell_data.state == GridCellState::Idle
+            {
+                cell_data.is_visible = true;
+                start_point_cell_value_option = Some(cell_data.value);
             }
         }
 
@@ -185,28 +201,28 @@ impl Grid {
 
             if GridCellValue::Number(0) == value {
                 if y_cord > 0 {
-                    self.set_cells_visible(&GridCellPoint {
+                    self.set_idle_cells_visible(&GridCellPoint {
                         y: y_cord - 1, 
                         x: x_cord
                     });
                 }
 
                 if y_cord < self.size.height {
-                    self.set_cells_visible(&GridCellPoint {
+                    self.set_idle_cells_visible(&GridCellPoint {
                         y: y_cord + 1, 
                         x: x_cord
                     });
                 }
     
                 if x_cord > 0 {
-                    self.set_cells_visible(&GridCellPoint {
+                    self.set_idle_cells_visible(&GridCellPoint {
                         y: y_cord, 
                         x: x_cord - 1
                     });
                 }
 
                 if x_cord < self.size.width {
-                    self.set_cells_visible(&GridCellPoint {
+                    self.set_idle_cells_visible(&GridCellPoint {
                         y: y_cord, 
                         x: x_cord + 1
                     });
@@ -217,13 +233,75 @@ impl Grid {
         start_point_cell_value_option
     }
     
-    pub fn set_cell_state(&mut self, point: &GridCellPoint, state: GridCellState) {
-        if let Some(cell) = self.get_cell_mut(point) {
-            if let GridCellVariant::Exist(cell_data) = &mut cell.variant {
-                if !cell_data.is_visible {
-                    cell_data.state = state;
+    // pub fn set_cell_state(&mut self, point: &GridCellPoint, state: GridCellState) {
+    //     if let Some(cell_data) = self.get_existing_cell_mut(point) {
+    //         if !cell_data.is_visible {
+    //             cell_data.state = state;
+    //         }
+    //     }
+    // }
+
+    pub fn set_all_bombs_visible(&mut self) {
+        for bomb_point in self.bombs.points.clone() {
+            if let Some(cell_data) = self.get_existing_cell_mut(&bomb_point) {
+                cell_data.is_visible = true;
+            }
+        }
+    }
+
+    pub fn set_all_flagged_cells_to_verify(&mut self) {
+        for flagged_point in self.cells.tagged_points.clone().iter().chain(self.cells.questioned_points.clone().iter()) {
+            if let Some(cell_data) = self.get_existing_cell_mut(&flagged_point) {
+                if let GridCellState::Flagged(flagged_state) = &cell_data.state {
+                    cell_data.state = GridCellState::ToVerifyFlag(flagged_state.clone());
                 }
             }
+        }
+    }
+
+    pub fn set_cell_flagged_state(&mut self, point: &GridCellPoint, option_flagged_state: Option<GridCellFlaggedState>) {
+        let mut next_cell_state = None;
+
+        if let Some(cell_data) = self.get_existing_cell_mut(point) {
+            if !cell_data.is_visible {
+                match option_flagged_state {
+                    Some(flagged_state) => Some(GridCellState::Flagged(flagged_state)),
+                    None => Some(GridCellState::Idle),
+                }
+                .and_then(|new_state| {
+                    cell_data.state = new_state.clone();
+                    next_cell_state = Some(new_state);
+                    Some(())
+                });
+            }
+        }
+
+        match next_cell_state {
+            Some(GridCellState::Flagged(GridCellFlaggedState::Tagged)) => {
+                self.cells.tagged_points.push_back(point.clone());
+            },
+            Some(GridCellState::Flagged(GridCellFlaggedState::Questioned)) => {
+                if let Ok(index) = self.cells.tagged_points.binary_search(point) {
+                    self
+                        .cells
+                        .tagged_points
+                        .remove(index);
+                }
+
+                self
+                    .cells
+                    .questioned_points
+                    .push_back(point.clone());
+            },
+            Some(GridCellState::Idle) => {
+                if let Ok(index) = self.cells.questioned_points.binary_search(point) {
+                    self
+                        .cells
+                        .questioned_points
+                        .remove(index);
+                }
+            },
+            _ => (),
         }
     }
 
@@ -232,7 +310,16 @@ impl Grid {
 
         let is_point_exist = |point: &GridCellPoint| {
             if let Some(points_vec) = non_existing_points {
-                return points_vec.contains(point)
+                for non_exist_point in points_vec {
+                    let non_exist_point = non_exist_point as &GridCellPoint;
+
+                    if
+                        non_exist_point.y == point.y &&
+                        non_exist_point.x == point.x
+                    {
+                        return false
+                    }
+                }
             }
 
             true
@@ -263,45 +350,38 @@ impl Grid {
     }
 
     fn set_bomb_to_cell(&mut self, point: &GridCellPoint) -> Result<(), ()> {
-        if let Some(cell) = self.get_cell_mut(point) {
+        if let Some(cell_data) = self.get_existing_cell_mut(point) {
+            if let GridCellValue::Number(_) = cell_data.value {
+                cell_data.value = GridCellValue::Bomb;
 
-            if let GridCellVariant::Exist(cell_data) = &mut cell.variant {
+                let (first_y, adjustment_y) = if point.y > 0 { (point.y - 1, 0) } else { (point.y, 1) };
+                let (first_x, adjustment_x) = if point.x > 0 { (point.x - 1, 0) } else { (point.x, 1) };
 
-                if let GridCellValue::Number(_) = cell_data.value {
+                for add_y in 0..(3 - adjustment_y) {
+                    for add_x in 0..(3 - adjustment_x) {
+                        let search_y = first_y + add_y;
+                        let search_x = first_x + add_x;
+                    
+                        if search_y == point.y && search_x == point.x { continue; }
 
-                    cell_data.value = GridCellValue::Bomb;
+                        let neighbor_cell = match self.get_cell_mut(&GridCellPoint { x: search_x, y: search_y }) {
+                            Some(cell) => { cell },
+                            None => { continue; },
+                        };
 
-                    let (first_y, adjustment_y) = if point.y > 0 { (point.y - 1, 0) } else { (point.y, 1) };
-                    let (first_x, adjustment_x) = if point.x > 0 { (point.x - 1, 0) } else { (point.x, 1) };
-
-                    for add_y in 0..(3 - adjustment_y) {
-                        for add_x in 0..(3 - adjustment_x) {
-                            let search_y = first_y + add_y;
-                            let search_x = first_x + add_x;
-                        
-                            if search_y == point.y && search_x == point.x { continue; }
-
-                            let neighbor_cell = match self.get_cell_mut(&GridCellPoint { x: search_x, y: search_y }) {
-                                Some(cell) => { cell },
-                                None => { continue; },
-                            };
-
-                            match &mut neighbor_cell.variant {
-                                GridCellVariant::Exist(neighbor_cell_data) => {
-                                    if let GridCellValue::Number(amount) = neighbor_cell_data.value {
-                                        neighbor_cell_data.value = GridCellValue::Number(amount + 1);
-                                    }
-                                },
-                                _ => {},
-                            };
-                        }
+                        match &mut neighbor_cell.variant {
+                            GridCellVariant::Exist(neighbor_cell_data) => {
+                                if let GridCellValue::Number(amount) = neighbor_cell_data.value {
+                                    neighbor_cell_data.value = GridCellValue::Number(amount + 1);
+                                }
+                            },
+                            _ => {},
+                        };
                     }
-
-                    return Ok(())
                 }
 
+                return Ok(())
             }
-            
         }
 
         Err(())

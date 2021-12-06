@@ -2,11 +2,10 @@ mod controllers;
 
 use std::str::FromStr;
 
-use druid::{LensExt, Widget, WidgetExt, lens};
+use druid::{LensExt, Widget, WidgetExt, lens, Color, RenderContext};
 use druid::widget::{List, Painter, Svg, SvgData, Either};
 
 use crate::assets::{
-    EMPTY_SVG_BG, 
     NUMS_SVG_BG_ARRAY, 
     TILE_OPENED_SVG_BG, 
     TILE_UNOPENED_SVG_BG,
@@ -16,7 +15,7 @@ use crate::assets::{
 };
 use crate::app::AppState;
 use crate::game::Game;
-use crate::grid::{GridCell, GridCells, GridCellState, GridCellValue, Grid, GridCellVariant};
+use crate::grid::{GridCell, GridCells, GridCellState, GridCellFlaggedState, GridCellValue, GridCellOpenedState, Grid, GridCellVariant};
 
 use controllers::GridCellController;
 
@@ -41,37 +40,57 @@ impl GridWidget {
     fn cell() -> impl Widget<GridCell> {
         let brush = Painter::new(move |ctx, cell: &GridCell, env| {
             if let GridCellVariant::Exist(cell_data) = &cell.variant {
-
-                let cell_bg = SvgData::from_str(
+                if let Ok(svg_data) = SvgData::from_str(
                     if cell_data.is_visible || cell_data.state == GridCellState::Active {
                         TILE_OPENED_SVG_BG
                     } else {
                         TILE_UNOPENED_SVG_BG
                     }
-                )
-                .unwrap_or(SvgData::empty());
-    
-                Svg::new(cell_bg).paint(ctx, cell, env);
-    
-                let cell_value = SvgData::from_str(match cell_data.state {
-                    GridCellState::Tagged => FLAG_SIGN_SVG_BG,
-                    GridCellState::Questioned => QUESTION_MARK_SIGN_SVG_BG,
+                ) {
+                    Svg::new(svg_data).paint(ctx, cell, env);
+                }
+
+                if let Some(color) = match cell_data.state {
+                    GridCellState::Opened(GridCellOpenedState::CausedLoss) => Some(&Color::RED),
+                    GridCellState::ToVerifyFlag(GridCellFlaggedState::Tagged) => {
+                        if let GridCellValue::Bomb = cell_data.value {
+                            Some(&Color::GREEN)
+                        } else {
+                            Some(&Color::RED)
+                        }
+                    },
+                    GridCellState::ToVerifyFlag(GridCellFlaggedState::Questioned) => {
+                        if let GridCellValue::Bomb = cell_data.value {
+                            Some(&Color::GREEN)
+                        } else {
+                            Some(&Color::YELLOW)
+                        }
+                    },
+                    _ => None
+                } {
+                    let bounds = ctx.size().to_rect();
+                    ctx.fill(bounds, color);
+                }
+
+                if let Some(asset_str) = match cell_data.state {
+                    GridCellState::Flagged(GridCellFlaggedState::Tagged) => Some(FLAG_SIGN_SVG_BG),
+                    GridCellState::Flagged(GridCellFlaggedState::Questioned) => Some(QUESTION_MARK_SIGN_SVG_BG),
                     _ => {
                         if cell_data.is_visible {
                             match cell_data.value {
-                                GridCellValue::Number(value) => NUMS_SVG_BG_ARRAY[value as usize],
-                                GridCellValue::Bomb => BOMB_SIGN_SVG_BG,
+                                GridCellValue::Number(value) => Some(NUMS_SVG_BG_ARRAY[value as usize]),
+                                GridCellValue::Bomb => Some(BOMB_SIGN_SVG_BG),
                             }
                         }
                         else {
-                            EMPTY_SVG_BG
+                            None
                         }
                     }
-                })
-                .unwrap_or(SvgData::empty());
-    
-                Svg::new(cell_value).paint(ctx, cell, env);
-
+                } {
+                    if let Ok(svg_data) = SvgData::from_str(asset_str) {
+                        Svg::new(svg_data).paint(ctx, cell, env);
+                    }
+                }
             }
         }); 
 

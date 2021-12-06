@@ -10,11 +10,12 @@ use druid::widget::Flex;
 
 use app::AppState;
 use game::Game;
-use ui::GridWidget;
+use ui::{InfoPanel, GridWidget};
 use delegate::MainDelegate;
 
 fn build_ui() -> impl Widget<AppState> {
     let mut flex = Flex::column();
+    flex.add_child(InfoPanel::new());
     flex.add_child(GridWidget::new());
     flex.center()
 }

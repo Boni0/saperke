@@ -1,11 +1,12 @@
 use druid::{AppDelegate, Command, DelegateCtx, Env, Handled, Target, Selector};
 
 use crate::app::AppState;
-use crate::game::{GameState, GameEndState};
-use crate::grid::{GridCellPoint, GridCellValue, GridCellState};
+use crate::game::{GameState};
+use crate::grid::{GridCellPoint, GridCellFlaggedState};
 
-pub const GRID_SET_CELLS_VISIBLE: Selector<GridCellPoint> = Selector::new("grid.set_cells_visible");
-pub const GRID_SET_CELL_STATE: Selector<(GridCellPoint, GridCellState)> = Selector::new("grid.set_cell_state");
+
+pub const GRID_OPEN_CELL: Selector<GridCellPoint> = Selector::new("grid.open_cell");
+pub const GRID_SET_CELL_FLAGGED_STATE: Selector<(GridCellPoint, Option<GridCellFlaggedState>)> = Selector::new("grid.set_cell_flagged_state");
 
 pub struct MainDelegate;
 
@@ -18,29 +19,14 @@ impl AppDelegate<AppState> for MainDelegate {
         state: &mut AppState,
         _env: &Env,
     ) -> Handled {
-        if state.game.state == GameState::Running {
-            if let Some((point, new_state)) = cmd.get(GRID_SET_CELL_STATE) {
-                state
-                    .game
-                    .grid
-                    .set_cell_state(point, new_state.clone());
-
+        if let GameState::EndState(_) = state.game.state {
+            if let Some((point, option_flagged_state)) = cmd.get(GRID_SET_CELL_FLAGGED_STATE) {
+                state.game.grid.set_cell_flagged_state(point, option_flagged_state.clone());
                 return Handled::Yes
             }
 
-            if let Some(point) = cmd.get(GRID_SET_CELLS_VISIBLE) {
-                state
-                    .game
-                    .grid
-                    .set_cells_visible(point)
-                    .and_then(|value| {
-                        if let GridCellValue::Bomb = value {
-                            state.game.state = GameState::EndState(GameEndState::Loss);
-                        }
-
-                        Some(())
-                    });
-
+            if let Some(point) = cmd.get(GRID_OPEN_CELL) {
+                state.game.open_cell(point);
                 return Handled::Yes
             }
         }
