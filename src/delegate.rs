@@ -2,11 +2,11 @@ use druid::{AppDelegate, Command, DelegateCtx, Env, Handled, Target, Selector};
 
 use crate::app::AppState;
 use crate::game::{GameState};
-use crate::grid::{GridCellPoint, GridCellFlaggedState};
+use crate::grid::{GridCellPoint, GridCellState, GridCellFlaggedState};
 
-
-pub const GRID_OPEN_CELL: Selector<GridCellPoint> = Selector::new("grid.open_cell");
-pub const GRID_SET_CELL_FLAGGED_STATE: Selector<(GridCellPoint, Option<GridCellFlaggedState>)> = Selector::new("grid.set_cell_flagged_state");
+pub const HANDLE_CELL_OPEN: Selector<GridCellPoint> = Selector::new("HANDLE_CELL_OPEN");
+pub const HANDLE_CELL_TOGGLE_HOVER: Selector<(GridCellPoint, GridCellState)> = Selector::new("HANDLE_CELL_TOGGLE_HOVER");
+pub const HANDLE_CELL_FLAGGING: Selector<(GridCellPoint, Option<GridCellFlaggedState>)> = Selector::new("HANDLE_CELL_FLAGGING");
 
 pub struct MainDelegate;
 
@@ -19,18 +19,27 @@ impl AppDelegate<AppState> for MainDelegate {
         state: &mut AppState,
         _env: &Env,
     ) -> Handled {
-        if let GameState::EndState(_) = state.game.state {
-            if let Some((point, option_flagged_state)) = cmd.get(GRID_SET_CELL_FLAGGED_STATE) {
-                state.game.grid.set_cell_flagged_state(point, option_flagged_state.clone());
-                return Handled::Yes
-            }
+        match state.game.state {
+            GameState::NotStarted | GameState::Running => {
+                if let Some(point) = cmd.get(HANDLE_CELL_OPEN) {
+                    state.game.handle_cell_open(point);
+                }
 
-            if let Some(point) = cmd.get(GRID_OPEN_CELL) {
-                state.game.open_cell(point);
-                return Handled::Yes
-            }
+                if let Some((point, new_state)) = cmd.get(HANDLE_CELL_TOGGLE_HOVER) {
+                    if let Some(cell_data) = state.game.grid.cells.get_existing_cell(point) {
+                        if !cell_data.is_visible {
+                            cell_data.state = new_state.clone();
+                        }
+                    }
+                }
+
+                if let Some((point, option_flagged_state)) = cmd.get(HANDLE_CELL_FLAGGING) {
+                    state.game.grid.handle_cell_flagged_state(point, option_flagged_state.clone());
+                }
+
+                Handled::Yes
+            },
+            _ => Handled::No
         }
-
-        Handled::No
     }
 }

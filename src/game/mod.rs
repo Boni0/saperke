@@ -1,7 +1,5 @@
 mod state;
 
-use druid::im::Vector;
-
 use crate::grid::{
     Grid,
     GridSize,
@@ -9,8 +7,7 @@ use crate::grid::{
     GridCellValue,
     GridBombsConfig,
     GridCellPoint, 
-    GridCellState,
-    GridCellOpenedState
+    GridCellState
 };
 use druid::{Data, Lens};
 
@@ -29,13 +26,6 @@ impl Game {
     pub fn new() -> Game {
         let test_width: usize = 10;
         let test_height: usize = 10;
-        // let test_mines: usize = 1;
-
-        let mut non_existed_test = Vector::new();
-        non_existed_test.push_back(GridCellPoint {
-            x: 5,
-            y: 5
-        });
 
         let grid = Grid::new(
             GridSize {
@@ -43,8 +33,6 @@ impl Game {
                 height: test_height
             },
             GridShape::RectangleOrSquare,
-            // GridShape::Unusual(non_existed_test),
-            // &GridBombsConfig::Randomized(test_mines)
             &GridBombsConfig::Randomized(10)
         );
 
@@ -54,21 +42,23 @@ impl Game {
         }
     }
 
-    pub fn open_cell(&mut self, point: &GridCellPoint) {
+    fn are_all_number_cells_visible(&self) -> bool {
+        self.grid.cells.visible_count == (self.grid.cells.exist_count - self.grid.bombs.count)
+    }
+
+    pub fn handle_cell_open(&mut self, point: &GridCellPoint) {
+        self.grid.cells.set_cell_state(point, GridCellState::Idle);
+
         self
             .grid
-            .set_idle_cells_visible(point)
+            .handle_cells_visible(point)
             .and_then(|value_of_first_visible_cell| {
                 match value_of_first_visible_cell {
                     GridCellValue::Number(_) => {
-                        if self.check_game_win_state() { Some(GameEndState::Win) } 
+                        if self.are_all_number_cells_visible() { Some(GameEndState::Win) } 
                         else { None }
                     },
                     GridCellValue::Bomb => {
-                        if let Some(cell_data) = self.grid.get_existing_cell_mut(point) {
-                            cell_data.state = GridCellState::Opened(GridCellOpenedState::CausedLoss);
-                        }
-
                         self.grid.set_all_bombs_visible();
                         self.grid.set_all_flagged_cells_to_verify();
 
@@ -81,8 +71,5 @@ impl Game {
                 Some(())
             });
     }
-
-    fn check_game_win_state(&self) -> bool {
-        self.grid.cells.visible_count == (self.grid.cells.exist_count - self.grid.bombs.count)
-    }
+    
 }

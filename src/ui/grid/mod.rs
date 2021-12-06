@@ -61,9 +61,9 @@ impl GridWidget {
                     },
                     GridCellState::ToVerifyFlag(GridCellFlaggedState::Questioned) => {
                         if let GridCellValue::Bomb = cell_data.value {
-                            Some(&Color::GREEN)
-                        } else {
                             Some(&Color::YELLOW)
+                        } else {
+                            Some(&Color::RED)
                         }
                     },
                     _ => None

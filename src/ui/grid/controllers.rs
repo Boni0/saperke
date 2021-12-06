@@ -1,10 +1,11 @@
 use druid::{Env, Event, EventCtx, MouseButton, Widget};
-use druid::widget::{Controller};
+use druid::widget::Controller;
 
 use crate::grid::{GridCellState, GridCell, GridCellVariant, GridCellFlaggedState};
 use crate::delegate::{
-    GRID_OPEN_CELL,
-    GRID_SET_CELL_FLAGGED_STATE
+    HANDLE_CELL_FLAGGING,
+    HANDLE_CELL_OPEN,
+    HANDLE_CELL_TOGGLE_HOVER,
 };
 
 pub struct GridCellController;
@@ -16,7 +17,7 @@ impl<W> Controller<GridCell, W> for GridCellController where W: Widget<GridCell>
             if !cell_data.is_visible {
 
                 // Idle/Hover state toggle
-                match event {
+                if let Some(new_state) = match event {
                     Event::MouseDown(mouse_event) => {
                         match mouse_event.button {
                             MouseButton::Left => {
@@ -49,11 +50,11 @@ impl<W> Controller<GridCell, W> for GridCellController where W: Widget<GridCell>
                         
                     },
                     _ => None
+                } {
+                    ctx.submit_command(HANDLE_CELL_TOGGLE_HOVER.with(
+                        (cell.point.clone(), new_state)
+                    ));
                 }
-                .and_then(|new_state| {
-                    cell_data.state = new_state;
-                    Some(())
-                });
 
                 // Flagged State
                 if let Event::MouseDown(mouse_event) = event {
@@ -64,7 +65,7 @@ impl<W> Controller<GridCell, W> for GridCellController where W: Widget<GridCell>
                             GridCellState::Flagged(GridCellFlaggedState::Questioned) => Some(None),
                             _ => None,
                         } {
-                            ctx.submit_command(GRID_SET_CELL_FLAGGED_STATE.with(
+                            ctx.submit_command(HANDLE_CELL_FLAGGING.with(
                                 (cell.point.clone(), new_flagged_state_option)
                             ));
                         }
@@ -77,7 +78,7 @@ impl<W> Controller<GridCell, W> for GridCellController where W: Widget<GridCell>
                         cell_data.state == GridCellState::Active &&
                         mouse_event.button == MouseButton::Left {
                             cell_data.state = GridCellState::Idle;
-                            ctx.submit_command(GRID_OPEN_CELL.with( cell.point.clone() ));
+                            ctx.submit_command(HANDLE_CELL_OPEN.with( cell.point.clone() ));
                     }
                 }
 
