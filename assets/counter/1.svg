@@ -1,3 +1,8 @@
-<svg xmlns="http://www.w3.org/2000/svg" width="88" height="168" viewBox="0 0 11 21">
-    <path d="M8.5,3v5 M8.5,13v5 M9.5,2v7 M9.5,12v7 M10.5,1v9 M10.5,11v9" stroke="red" />
+<svg xmlns="http://www.w3.org/2000/svg" stroke-width="2" stroke="#7b0000" width="88" height="168" viewBox="0 0 11 21">
+    <path d="M0,1h1 M0,3h1 M0,5h1 M0,7h1 M0,9h1 M1,2h1 M1,4h1 M1,6h1 M1,8h1" />
+    <path d="M0,11h1 M0,13h1 M0,15h1 M0,17h1 M0,19h1 M1,12h1 M1,14h1 M1,16h1 M1,18h1" />
+    <path d="M2,0h1 M4,0h1 M6,0h1 M8,0h1 M3,1h1 M5,1h1 M7,1h1 M4,2h1 M6,2h1"  />
+    <path d="M3,9h1 M5,9h1 M7,9h1 M2,10h1 M4,10h1 M6,10h1 M8,10h1 M3,11h1 M5,11h1 M7,11h1" />
+    <path d="M4,18h1 M6,18h1 M3,19h1 M5,19h1 M7,19h1 M2,20h1 M4,20h1 M6,20h1 M8,20h1" />
+    <path d="M8,3v5 M8,13v5 M9,2v7 M9,12v7 M10,1v9 M10,11v9" stroke="red" />
 </svg>

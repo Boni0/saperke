@@ -1,3 +1,9 @@
-<svg xmlns="http://www.w3.org/2000/svg" width="88" height="168" viewBox="0 0 11 21">
-    <path d="M0.5,1v9 M1.5,0v1 M1.5,2v7 M1.5,10v1 M1.5,20v1 M2.5,0v2 M2.5,3v5 M2.5,9v3 M2.5,19v2 M3.5,0v3 M3.5,9v3 M3.5,18v3 M4.5,0v3 M4.5,9v3 M4.5,18v3 M5.5,0v3 M5.5,9v3 M5.5,18v3 M6.5,0v3 M6.5,9v3 M6.5,18v3 M7.5,0v3 M7.5,9v3 M7.5,18v3 M8.5,0v2 M8.5,3v5 M8.5,9v3 M8.5,13v5 M8.5,19v2 M9.5,0v1 M9.5,2v7 M9.5,10v1 M9.5,12v7 M9.5,20v1 M10.5,1v9 M10.5,11v9" stroke="red" />
+<svg xmlns="http://www.w3.org/2000/svg" stroke-width="2" stroke="red" width="88" height="168" viewBox="0 0 11 21">
+    <path d="M0.5,1v9 M1.5,2v7 M2.5,3v5" />
+    <path d="M8.5,3v5 M9.5,2v7 M10.5,1v9" />
+    <path d="M8.5,13v5 M9.5,12v7 M10.5,11v9" />
+    <path d="M1,0.5h9 M2,1.5h7 M3,2.5h5" />
+    <path d="M2,9.5h7 M1,10.5h9 M2,11.5h7" />
+    <path d="M3,18.5h5 M2,19.5h7 M1,20.5h9" />
+    <path d="M0,11.5h1 M0,13.5h1 M0,15.5h1 M0,17.5h1 M0,19.5h1 M1,12.5h1 M1,14.5h1 M1,16.5h1 M1,18.5h1 M2,13.5h1 M2,15.5h1 M2,17.5h1" stroke="#7b0000" />
 </svg>
