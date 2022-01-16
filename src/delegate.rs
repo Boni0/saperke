@@ -1,3 +1,5 @@
+use std::time::Duration;
+
 use druid::{AppDelegate, Command, DelegateCtx, Env, Handled, Target, Selector};
 
 use crate::app::AppState;
@@ -7,6 +9,7 @@ use crate::grid::{GridCellPoint, GridCellState, GridCellFlaggedState};
 pub const HANDLE_CELL_OPEN: Selector<GridCellPoint> = Selector::new("HANDLE_CELL_OPEN");
 pub const HANDLE_CELL_TOGGLE_HOVER: Selector<(GridCellPoint, GridCellState)> = Selector::new("HANDLE_CELL_TOGGLE_HOVER");
 pub const HANDLE_CELL_FLAGGING: Selector<(GridCellPoint, Option<GridCellFlaggedState>)> = Selector::new("HANDLE_CELL_FLAGGING");
+pub const HANDLE_TIMER: Selector = Selector::new("HANDLE_TIMER");
 
 pub struct MainDelegate;
 
@@ -41,7 +44,13 @@ impl AppDelegate<AppState> for MainDelegate {
                 state.game.grid.handle_cell_flagged_state(point, option_flagged_state.clone());
                 return Handled::Yes
             }
+        }
 
+        if let Some(_) = cmd.get(HANDLE_TIMER) {
+            if state.game.state == GameState::Running {
+                state.game.time += Duration::from_millis(10);
+                return Handled::Yes
+            }
         }
 
         Handled::No

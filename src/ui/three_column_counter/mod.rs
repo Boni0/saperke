@@ -29,12 +29,12 @@ impl ThreeColumnCounter {
                         if *count < 0 {
                             COUNTER_MINUS_SVG_BG
                         } else {
-                            let idx: usize = (*count / 100).abs().try_into().unwrap();
+                            let idx: usize = ((*count % 1000) / 100).abs().try_into().unwrap();
                             COUNTER_NUMS_SVG_BG_ARRAY[idx]
                         }
                     },
                     CounterColumn::Second => {
-                        let idx: usize = (*count / 10).abs().try_into().unwrap();
+                        let idx: usize = ((*count % 100) / 10).abs().try_into().unwrap();
                         COUNTER_NUMS_SVG_BG_ARRAY[idx]
                     },
                     CounterColumn::Third => {

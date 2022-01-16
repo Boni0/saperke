@@ -5,7 +5,7 @@ use druid::widget::{Button, Flex};
 
 use crate::app::AppState;
 use crate::game::Game;
-use crate::ui::{ThreeColumnCounter, TimerCounter};
+use crate::ui::ThreeColumnCounter;
 
 pub struct InfoPanel;
 
@@ -32,7 +32,11 @@ impl InfoPanel {
         );
 
         flex.add_child(
-            TimerCounter::new()
+            ThreeColumnCounter::new()
+                .lens(lens::Identity.map(
+                |state: &AppState| state.game.time.as_secs().try_into().unwrap(),
+                |_, _| {}
+                ))
         );
 
         flex
