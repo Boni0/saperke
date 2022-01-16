@@ -9,6 +9,11 @@ use crate::assets::{
     COUNTER_NUMS_SVG_BG_ARRAY
 };
 
+use crate::consts::{
+    TIMER_COLUMN_WIDTH,
+    TIMER_COLUMN_HEIGHT
+};
+
 enum CounterColumn {
     First,
     Second,
@@ -54,19 +59,19 @@ impl ThreeColumnCounter {
         flex.add_child(
             Svg::new(SvgData::empty())
                 .background(create_brush(CounterColumn::First))
-                .fix_size(18.0, 32.0)
+                .fix_size(TIMER_COLUMN_WIDTH, TIMER_COLUMN_HEIGHT)
         );
 
         flex.add_child(
             Svg::new(SvgData::empty())
                 .background(create_brush(CounterColumn::Second))
-                .fix_size(18.0, 32.0)
+                .fix_size(TIMER_COLUMN_WIDTH, TIMER_COLUMN_HEIGHT)
         );
 
         flex.add_child(
             Svg::new(SvgData::empty())
                 .background(create_brush(CounterColumn::Third))
-                .fix_size(18.0, 32.0)
+                .fix_size(TIMER_COLUMN_WIDTH, TIMER_COLUMN_HEIGHT)
         );
 
         flex

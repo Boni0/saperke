@@ -4,9 +4,9 @@ mod ui;
 mod assets;
 mod app;
 mod delegate;
+mod consts;
 
 use std::thread;
-use std::time::Duration;
 
 use druid::{AppLauncher, PlatformError, Widget, WindowDesc, WidgetExt, ExtEventSink, Target};
 use druid::widget::Flex;
@@ -15,6 +15,7 @@ use app::AppState;
 use game::Game;
 use ui::{InfoPanel, GridWidget};
 use delegate::{MainDelegate, HANDLE_TIMER};
+use consts::TIMER_INTERVAL;
 
 fn build_ui() -> impl Widget<AppState> {
     let mut flex = Flex::column();
@@ -24,11 +25,9 @@ fn build_ui() -> impl Widget<AppState> {
 }
 
 fn create_timer(event_sink: ExtEventSink) {
-    let duration = Duration::from_millis(10);
-
     loop {
         event_sink.submit_command(HANDLE_TIMER, (), Target::Auto).unwrap();
-        thread::sleep(duration);
+        thread::sleep(TIMER_INTERVAL);
     }
 }
 

@@ -3,8 +3,9 @@ use std::str::FromStr;
 use druid::{Widget, WidgetExt, EventCtx, Event, Env, LifeCycleCtx, LifeCycle, UpdateCtx, LayoutCtx, BoxConstraints, Size, PaintCtx, Color, RenderContext};
 use druid::widget::{Svg, SvgData, Painter};
 
-use crate::assets::{TILE_OPENED_SVG_BG, TILE_UNOPENED_SVG_BG, FLAG_SIGN_SVG_BG, QUESTION_MARK_SIGN_SVG_BG, NUMS_SVG_BG_ARRAY, BOMB_SIGN_SVG_BG};
 use crate::grid::{GridCell, GridCellState, GridCellFlaggedState, GridCellValue, GridCellOpenedState, GridCellVariant};
+use crate::assets::{TILE_OPENED_SVG_BG, TILE_UNOPENED_SVG_BG, FLAG_SIGN_SVG_BG, QUESTION_MARK_SIGN_SVG_BG, NUMS_SVG_BG_ARRAY, BOMB_SIGN_SVG_BG};
+use crate::consts::{GRID_CELL_WIDTH, GRID_CELL_HEIGHT};
 
 use super::GridCellController;
 
@@ -16,7 +17,7 @@ impl CellWidget {
     pub fn new() -> Self {
         Self {
             cell_widget: Box::new(
-                Svg::new(SvgData::empty()).fix_size(23.0, 23.0)
+                Svg::new(SvgData::empty()).fix_size(GRID_CELL_WIDTH, GRID_CELL_HEIGHT)
            ),
         }
     }
@@ -91,7 +92,7 @@ impl Widget<GridCell> for CellWidget {
                 if data.variant != GridCellVariant::NonExist {
                     self.cell_widget = Box::new(
                         Svg::new(SvgData::empty())
-                        .fix_size(23.0, 23.0)
+                        .fix_size(GRID_CELL_WIDTH, GRID_CELL_HEIGHT)
                         .background(self.get_painter())
                         .controller(GridCellController)
                     )

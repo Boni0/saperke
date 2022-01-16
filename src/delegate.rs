@@ -1,10 +1,9 @@
-use std::time::Duration;
-
 use druid::{AppDelegate, Command, DelegateCtx, Env, Handled, Target, Selector};
 
 use crate::app::AppState;
 use crate::game::{GameState};
 use crate::grid::{GridCellPoint, GridCellState, GridCellFlaggedState};
+use crate::consts::TIMER_INTERVAL;
 
 pub const HANDLE_CELL_OPEN: Selector<GridCellPoint> = Selector::new("HANDLE_CELL_OPEN");
 pub const HANDLE_CELL_TOGGLE_HOVER: Selector<(GridCellPoint, GridCellState)> = Selector::new("HANDLE_CELL_TOGGLE_HOVER");
@@ -48,7 +47,7 @@ impl AppDelegate<AppState> for MainDelegate {
 
         if let Some(_) = cmd.get(HANDLE_TIMER) {
             if state.game.state == GameState::Running {
-                state.game.time += Duration::from_millis(10);
+                state.game.time += TIMER_INTERVAL;
                 return Handled::Yes
             }
         }
