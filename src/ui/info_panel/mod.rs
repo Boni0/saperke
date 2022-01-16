@@ -1,15 +1,11 @@
-use std::str::FromStr;
+use std::convert::TryInto;
 
-use druid::{Widget, WidgetExt, lens, Color, RenderContext};
-use druid::widget::{Button, Flex, Svg, SvgData, Painter};
+use druid::{Widget, WidgetExt, lens, LensExt};
+use druid::widget::{Button, Flex};
 
 use crate::app::AppState;
-use crate::game::{Game, GameState};
-
-use crate::assets::{
-    COUNTER_NUMS_SVG_BG_ARRAY,
-    COUNTER_MINUS_SVG_BG
-};
+use crate::game::Game;
+use crate::ui::{ThreeColumnCounter, TimerCounter};
 
 pub struct InfoPanel;
 
@@ -17,34 +13,26 @@ impl InfoPanel {
     pub fn new() -> impl Widget<AppState> {
         let mut flex = Flex::row();
 
-
-        let brush = Painter::new(|ctx, app_data: &AppState, env| {
-            let bounds = ctx.size().to_rect();
-            ctx.fill(bounds, &Color::BLACK);
-
-            // if let Ok(svg_data) = SvgData::from_str(COUNTER_NONE_SVG_BG) {
-            //     Svg::new(svg_data).paint(ctx, app_data, env)
-            // }
-
-            if let Ok(svg_data) = SvgData::from_str(COUNTER_MINUS_SVG_BG) {
-                Svg::new(svg_data).paint(ctx, app_data, env)
-            }
-        });
-
         flex.add_child(
-            Svg::new(SvgData::empty())
-                .background(brush)
-                .fix_size(18.0, 32.0)
-                // .fix_size(88.0, 164.0)
+            ThreeColumnCounter::new()
+                .lens(lens::Identity.map(
+                |state: &AppState| {
+                    let bombs_count: i64 = state.game.grid.bombs.count.try_into().unwrap();
+                    let tagged_count: i64 = state.game.grid.cells.tagged_points.len().try_into().unwrap();
+                    bombs_count - tagged_count
+                },
+                |_, _| {}
+                ))
         );
 
         flex.add_child(
             Button::new("New")
-            .on_click(|_, game: &mut Game, _| {
-                game.grid.refresh();
-                game.state = GameState::Running;
-            })
+            .on_click(|_, game: &mut Game, _| game.restart())
             .lens(lens!(AppState, game))
+        );
+
+        flex.add_child(
+            TimerCounter::new()
         );
 
         flex

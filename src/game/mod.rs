@@ -1,5 +1,7 @@
 mod state;
 
+use std::time::Duration;
+
 use crate::grid::{
     Grid,
     GridSize,
@@ -19,7 +21,9 @@ pub use state::{
 #[derive(Clone, Data, Lens)]
 pub struct Game {
     pub grid: Grid,
-    pub state: GameState
+    pub state: GameState,
+    #[data(same_fn = "PartialEq::eq")]
+    pub time: Duration
 }
 
 impl Game {
@@ -38,8 +42,15 @@ impl Game {
 
         Game {
             grid,
-            state: GameState::Running
+            state: GameState::NotStarted,
+            time: Duration::from_millis(0)
         }
+    }
+
+    pub fn restart(&mut self) {
+        self.grid.refresh();
+        self.state = GameState::NotStarted;
+        self.time = Duration::from_millis(0);
     }
 
     fn are_all_number_cells_visible(&self) -> bool {
@@ -47,6 +58,10 @@ impl Game {
     }
 
     pub fn handle_cell_open(&mut self, point: &GridCellPoint) {
+        if self.state == GameState::NotStarted {
+            self.state = GameState::Running;
+        }
+
         self.grid.cells.set_cell_state(point, GridCellState::Idle);
 
         self
