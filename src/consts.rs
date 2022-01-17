@@ -1,5 +1,7 @@
 use std::time::Duration;
 
+pub static TITLE: &str = "Saperke";
+
 pub static TIMER_COLUMN_WIDTH: f64 = 18.0;
 pub static TIMER_COLUMN_HEIGHT: f64 = 32.0;
 pub static TIMER_INTERVAL: Duration = Duration::from_millis(10);

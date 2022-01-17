@@ -1,5 +1,6 @@
 mod controllers;
 mod cell;
+mod utils;
 
 use druid::{LensExt, Widget, WidgetExt, lens};
 use druid::widget::List;

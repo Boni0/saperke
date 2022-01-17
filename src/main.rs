@@ -7,22 +7,12 @@ mod delegate;
 mod consts;
 
 use std::thread;
-
-use druid::{AppLauncher, PlatformError, Widget, WindowDesc, WidgetExt, ExtEventSink, Target};
-use druid::widget::Flex;
+use druid::{AppLauncher, PlatformError, WindowDesc, ExtEventSink, Target};
 
 use app::AppState;
 use game::Game;
-use ui::{InfoPanel, GridWidget};
 use delegate::{MainDelegate, HANDLE_TIMER};
-use consts::TIMER_INTERVAL;
-
-fn build_ui() -> impl Widget<AppState> {
-    let mut flex = Flex::column();
-    flex.add_child(InfoPanel::new());
-    flex.add_child(GridWidget::new());
-    flex.center()
-}
+use consts::{TITLE, TIMER_INTERVAL};
 
 fn create_timer(event_sink: ExtEventSink) {
     loop {
@@ -32,7 +22,7 @@ fn create_timer(event_sink: ExtEventSink) {
 }
 
 fn main() -> Result<(), PlatformError> {
-    let window = WindowDesc::new(build_ui ).title("Saperke");
+    let window = WindowDesc::new(ui::build ).title(TITLE);
     let state = AppState { game: Game::new() };
 
     let launcher = AppLauncher::with_window(window).delegate(MainDelegate);
