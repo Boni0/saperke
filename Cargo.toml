@@ -1,5 +1,5 @@
 [package]
-name = "minesweeper"
+name = "saperke"
 version = "0.1.0"
 authors = ["boni0 <bonik.dawid@gmail.com>"]
 edition = "2018"
