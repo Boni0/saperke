@@ -28,8 +28,8 @@ pub struct Game {
 
 impl Game {
     pub fn new() -> Game {
-        let test_width: usize = 10;
-        let test_height: usize = 10;
+        let test_width: usize = 24;
+        let test_height: usize = 24;
 
         let grid = Grid::new(
             GridSize {
@@ -37,7 +37,7 @@ impl Game {
                 height: test_height
             },
             GridShape::RectangleOrSquare,
-            &GridBombsConfig::Randomized(10)
+            &GridBombsConfig::Randomized(100)
         );
 
         Game {
@@ -53,33 +53,34 @@ impl Game {
         self.time = Duration::from_millis(0);
     }
 
-    fn are_all_number_cells_visible(&self) -> bool {
-        self.grid.cells.visible_count == (self.grid.cells.exist_count - self.grid.bombs.count)
-    }
-
     pub fn handle_cell_open(&mut self, point: &GridCellPoint) {
         if self.state == GameState::NotStarted {
             self.state = GameState::Running;
         }
 
-        self.grid.cells.set_cell_state(point, GridCellState::Idle);
+        let mut grid_clone = Clone::clone(&self.grid);
+        grid_clone.cells.set_cell_state(point, GridCellState::Idle);
 
-        self
-            .grid
-            .handle_cells_visible(point)
+        grid_clone.handle_cells_visible(point)
             .and_then(|value_of_first_visible_cell| {
+                let mut end_state_option = None;
+
                 match value_of_first_visible_cell {
                     GridCellValue::Number(_) => {
-                        if self.are_all_number_cells_visible() { Some(GameEndState::Win) } 
-                        else { None }
+                        if grid_clone.cells.visible_count == (grid_clone.cells.exist_count - grid_clone.bombs.count) { 
+                            end_state_option = Some(GameEndState::Win); 
+                        } 
                     },
                     GridCellValue::Bomb => {
-                        self.grid.set_all_bombs_visible();
-                        self.grid.set_all_flagged_cells_to_verify();
+                        grid_clone.set_all_bombs_visible();
+                        grid_clone.set_all_flagged_cells_to_verify();
 
-                        Some(GameEndState::Loss)
+                        end_state_option = Some(GameEndState::Loss);
                     },
                 }
+
+                self.grid = grid_clone;
+                end_state_option
             })
             .and_then(|end_state| {
                 self.state = GameState::EndState(end_state);

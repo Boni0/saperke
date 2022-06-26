@@ -26,9 +26,9 @@ fn main() -> Result<(), PlatformError> {
     let state = AppState { game: Game::new() };
 
     let launcher = AppLauncher::with_window(window).delegate(MainDelegate);
-    let event_sink = launcher.get_external_handle();
-
-    thread::spawn(move || create_timer(event_sink));
+    // let event_sink = launcher.get_external_handle();
+    // Temp remove
+    //thread::spawn(move || create_timer(event_sink));
 
     launcher.launch(state)?;
     Ok(())

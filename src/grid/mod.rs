@@ -277,7 +277,7 @@ impl Grid {
 
         let is_point_exist = |point: &GridCellPoint| {
             if let Some(points_vec) = non_existing_points {
-                if let Ok(_) = points_vec.binary_search(point) { return true; }
+                if let Ok(_) = points_vec.binary_search(point) { return false; }
             }
 
             true
