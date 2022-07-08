@@ -1,28 +1,30 @@
-mod grid;
-mod game;
-mod ui;
-mod assets;
 mod app;
-mod delegate;
+mod assets;
 mod consts;
+mod delegate;
+mod game;
+mod grid;
+mod ui;
 
+use druid::{AppLauncher, ExtEventSink, PlatformError, Target, WindowDesc};
 use std::thread;
-use druid::{AppLauncher, PlatformError, WindowDesc, ExtEventSink, Target};
 
 use app::AppState;
-use game::Game;
+use consts::{TIMER_INTERVAL, TITLE};
 use delegate::{MainDelegate, HANDLE_TIMER};
-use consts::{TITLE, TIMER_INTERVAL};
+use game::Game;
 
 fn create_timer(event_sink: ExtEventSink) {
     loop {
-        event_sink.submit_command(HANDLE_TIMER, (), Target::Auto).unwrap();
+        event_sink
+            .submit_command(HANDLE_TIMER, (), Target::Auto)
+            .unwrap();
         thread::sleep(TIMER_INTERVAL);
     }
 }
 
 fn main() -> Result<(), PlatformError> {
-    let window = WindowDesc::new(ui::build ).title(TITLE);
+    let window = WindowDesc::new(ui::build).title(TITLE).resizable(false);
     let state = AppState { game: Game::new() };
 
     let launcher = AppLauncher::with_window(window).delegate(MainDelegate);
