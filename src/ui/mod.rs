@@ -1,3 +1,4 @@
+mod border_box;
 mod grid;
 mod info_panel;
 mod three_column_counter;
@@ -15,6 +16,8 @@ pub use info_panel::InfoPanel;
 pub use three_column_counter::ThreeColumnCounter;
 pub use window_size_observer::WindowSizeObserverWidget;
 
+use self::border_box::{BorderBox, BorderColorPattern};
+
 pub fn build() -> impl Widget<AppState> {
     let mut flex = Flex::column();
 
@@ -31,6 +34,6 @@ pub fn build() -> impl Widget<AppState> {
             .then(lens!(Grid, size)),
     ));
 
-    flex.center()
+    BorderBox::new(flex.center(), BorderColorPattern::LigherFirst)
         .background(Color::from_hex_str(BACKGROUND_COLOR_HEX).unwrap())
 }

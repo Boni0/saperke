@@ -14,7 +14,7 @@ impl WindowSizeObserverWidget {
     fn set_window_size(&self, window_handle: &WindowHandle, size: &GridSize) {
         window_handle.set_size(Size {
             width: (GRID_CELL_WIDTH * (size.width as f64)) + 50.0,
-            height: (GRID_CELL_HEIGHT * (size.height as f64)) + 50.0,
+            height: (GRID_CELL_HEIGHT * (size.height as f64)) + 150.0,
         })
     }
 }

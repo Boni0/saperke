@@ -1,7 +1,7 @@
 mod utils;
 
-use druid::Widget;
 use druid::widget::Flex;
+use druid::Widget;
 
 use utils::CounterColumn;
 
