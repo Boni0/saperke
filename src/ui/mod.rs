@@ -3,11 +3,12 @@ mod info_panel;
 mod three_column_counter;
 mod window_size_observer;
 
+use crate::consts::BACKGROUND_COLOR_HEX;
 use crate::game::Game;
 use crate::grid::Grid;
 use crate::AppState;
 use druid::widget::{Flex, LensWrap};
-use druid::{lens, LensExt, Widget, WidgetExt};
+use druid::{lens, Color, LensExt, Widget, WidgetExt};
 
 pub use grid::GridWidget;
 pub use info_panel::InfoPanel;
@@ -29,5 +30,7 @@ pub fn build() -> impl Widget<AppState> {
             .then(lens!(Game, grid))
             .then(lens!(Grid, size)),
     ));
+
     flex.center()
+        .background(Color::from_hex_str(BACKGROUND_COLOR_HEX).unwrap())
 }
