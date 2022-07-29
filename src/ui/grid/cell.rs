@@ -1,7 +1,10 @@
-use druid::{Widget, WidgetExt, EventCtx, Event, Env, LifeCycleCtx, LifeCycle, UpdateCtx, LayoutCtx, BoxConstraints, Size, PaintCtx};
+use druid::{
+    BoxConstraints, Env, Event, EventCtx, LayoutCtx, LifeCycle, LifeCycleCtx, PaintCtx, Size,
+    UpdateCtx, Widget, WidgetExt,
+};
 
+use super::utils;
 use crate::grid::{GridCell, GridCellVariant};
-use super::{GridCellController, utils};
 
 pub struct CellWidget {
     cell_widget: Box<dyn Widget<GridCell>>,
@@ -25,12 +28,10 @@ impl Widget<GridCell> for CellWidget {
             LifeCycle::WidgetAdded => {
                 if data.variant != GridCellVariant::NonExist {
                     self.cell_widget = Box::new(
-                        utils::create_cell_svg()
-                            .background(utils::get_cell_painter())
-                            .controller(GridCellController)
+                        utils::create_cell_svg().background(utils::get_cell_painter()), // .controller(GridCellController)
                     );
                 }
-            },
+            }
             _ => {}
         }
 
@@ -41,7 +42,13 @@ impl Widget<GridCell> for CellWidget {
         self.cell_widget.update(ctx, old_data, data, env);
     }
 
-    fn layout(&mut self, ctx: &mut LayoutCtx, bc: &BoxConstraints, data: &GridCell, env: &Env) -> Size {
+    fn layout(
+        &mut self,
+        ctx: &mut LayoutCtx,
+        bc: &BoxConstraints,
+        data: &GridCell,
+        env: &Env,
+    ) -> Size {
         self.cell_widget.layout(ctx, &bc.loosen(), data, env)
     }
 

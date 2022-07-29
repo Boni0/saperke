@@ -1,11 +1,15 @@
+mod utils;
+
 use std::convert::TryInto;
 
-use druid::widget::{Button, Flex};
+use druid::widget::{Button, Flex, SizedBox};
 use druid::{lens, LensExt, Widget, WidgetExt};
 
 use crate::app::AppState;
 use crate::game::Game;
 use crate::ui::ThreeColumnCounter;
+
+use self::utils::get_btn_painter;
 
 use super::border_box::{BorderBox, BorderColorPattern};
 
@@ -31,8 +35,17 @@ impl InfoPanel {
             |_, _| {},
         )));
 
+        // flex.add_child(
+        //     Button::new("")
+        //         .fix_size(20.0, 20.0)
+        //         .on_click(|_, game: &mut Game, _| game.restart())
+        //         .lens(lens!(AppState, game)),
+        // );
+
         flex.add_child(
-            Button::new("New")
+            SizedBox::empty()
+                .fix_size(40.0, 40.0)
+                .background(get_btn_painter())
                 .on_click(|_, game: &mut Game, _| game.restart())
                 .lens(lens!(AppState, game)),
         );

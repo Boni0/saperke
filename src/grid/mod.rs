@@ -1,5 +1,5 @@
-mod cells;
 mod bombs;
+mod cells;
 mod shape_size;
 
 use rand::prelude::*;
@@ -10,33 +10,14 @@ use druid::{Data, Lens};
 pub type GridSizeUnit = usize;
 
 pub use cells::{
-    GridCells,
-    GridCell,
-    GridCellPoint,
-    GridCellMatrix,
-    GridCellMatrixRow,
-    GridCellState,
-    GridCellOpenedState,
-    GridCellFlaggedState,
-    GridCellVariant,
-    GridCellValueUnit,
+    GridCell, GridCellFlaggedState, GridCellMatrix, GridCellMatrixRow, GridCellOpenedState,
+    GridCellPoint, GridCellState, GridCellValue, GridCellValueUnit, GridCellVariant, GridCells,
     GridExistingCell,
-    GridCellValue
 };
 
-pub use shape_size::{
-    GridShape,
-    GridSize,
-    GridShapeSizeUnit,
-    NonExistedPoints,
-};
+pub use shape_size::{GridShape, GridShapeSizeUnit, GridSize, NonExistedPoints};
 
-pub use bombs::{
-    GridBombs,
-    GridBombsConfig,
-    GridBombsPropagation,
-    BombsPoints
-};
+pub use bombs::{BombsPoints, GridBombs, GridBombsConfig, GridBombsPropagation};
 
 use self::cells::RemovePoint;
 
@@ -45,7 +26,8 @@ pub struct Grid {
     pub size: GridSize,
     pub shape: GridShape,
     pub cells: GridCells,
-    pub bombs: GridBombs
+    pub bombs: GridBombs,
+    pub is_active: bool,
 }
 
 const INIT_EXISTING_CELL: GridExistingCell = GridExistingCell {
@@ -63,8 +45,8 @@ impl Grid {
             GridShape::Unusual(non_existing_points) => {
                 exist_count -= non_existing_points.len();
                 non_existing_points_option = Some(non_existing_points);
-            },
-            _ => ()
+            }
+            _ => (),
         };
 
         let cells = GridCells {
@@ -74,6 +56,7 @@ impl Grid {
             visible_count: 0,
             tagged_points: Vector::new(),
             questioned_points: Vector::new(),
+            last_interacted_cell_state: None,
         };
 
         let get_eligible_bombs_count = |check_amount: usize| {
@@ -88,7 +71,7 @@ impl Grid {
             GridBombsConfig::Randomized(amount) => GridBombs {
                 count: get_eligible_bombs_count(*amount),
                 points: Vector::new(),
-                propagation: GridBombsPropagation::Randomized
+                propagation: GridBombsPropagation::Randomized,
             },
             GridBombsConfig::Selected(bomb_points) => {
                 let count = get_eligible_bombs_count(bomb_points.len());
@@ -103,9 +86,9 @@ impl Grid {
                 GridBombs {
                     count,
                     points: bomb_points,
-                    propagation: GridBombsPropagation::Selected
+                    propagation: GridBombsPropagation::Selected,
                 }
-            },
+            }
         };
 
         let mut grid = Self {
@@ -113,6 +96,7 @@ impl Grid {
             shape,
             cells,
             bombs,
+            is_active: false,
         };
 
         let random_mines_count = match grid.bombs.propagation {
@@ -127,8 +111,9 @@ impl Grid {
                 }
 
                 grid.bombs.points = new_selected_points;
+                // TODO: Check if it's working correctly (IMO should return 0 for random)
                 grid.bombs.count
-            },
+            }
         };
 
         grid.set_bombs_to_grid_randomly(random_mines_count);
@@ -144,16 +129,14 @@ impl Grid {
                 let cell = cell as &mut GridCell;
 
                 if let GridCellVariant::Exist(cell_data) = &cell.variant {
-                    cell.variant = GridCellVariant::Exist(
-                        match self.bombs.propagation {
-                            GridBombsPropagation::Randomized => INIT_EXISTING_CELL,
-                            GridBombsPropagation::Selected => GridExistingCell {
-                                value: cell_data.value,
-                                ..INIT_EXISTING_CELL
-                            }
-                        }
-                    );
-                } 
+                    cell.variant = GridCellVariant::Exist(match self.bombs.propagation {
+                        GridBombsPropagation::Randomized => INIT_EXISTING_CELL,
+                        GridBombsPropagation::Selected => GridExistingCell {
+                            value: cell_data.value,
+                            ..INIT_EXISTING_CELL
+                        },
+                    });
+                }
             }
         }
 
@@ -164,29 +147,42 @@ impl Grid {
     }
 
     pub fn handle_cells_visible(&mut self, start_point: &GridCellPoint) -> Option<GridCellValue> {
-        let GridCellPoint { y: y_cord, x: x_cord } = *start_point;
-        let mut start_point_cell_value_option = None;
+        let GridCellPoint {
+            y: y_cord,
+            x: x_cord,
+        } = *start_point;
+        // let mut start_point_cell_value_option = None;
 
-        if let Some(cell_data) = self.cells.get_existing_cell(start_point) {
-            if cell_data.state == GridCellState::Active {
-                cell_data.state = GridCellState::Idle;
-            }
-
-            if 
-                cell_data.is_visible == false
-                && cell_data.state == GridCellState::Idle
-            {
+        let start_point_cell_value_option = self
+            .cells
+            .set_cell_idle_state(start_point)
+            .get_existing_invisible_cell(start_point)
+            .and_then(|cell_data| {
                 cell_data.is_visible = true;
-                start_point_cell_value_option = Some(cell_data.value.clone());
 
-                cell_data.state = GridCellState::Opened(
-                    match cell_data.value {
-                        GridCellValue::Number(_) => GridCellOpenedState::NoAction,
-                        GridCellValue::Bomb => GridCellOpenedState::CausedLoss,
-                    }
-                )
-            }
-        }
+                cell_data.state = GridCellState::Opened(match cell_data.value {
+                    GridCellValue::Number(_) => GridCellOpenedState::NoAction,
+                    GridCellValue::Bomb => GridCellOpenedState::CausedLoss,
+                });
+
+                Some(cell_data.value)
+            });
+
+        // if let Some(cell_data) = self.cells.get_existing_invisible_cell(start_point) {
+        //     if cell_data.state == GridCellState::Active {
+        //         cell_data.state = GridCellState::Idle;
+        //     }
+
+        //     if cell_data.state == GridCellState::Idle {
+        //         cell_data.is_visible = true;
+        //         start_point_cell_value_option = Some(cell_data.value.clone());
+
+        //         cell_data.state = GridCellState::Opened(match cell_data.value {
+        //             GridCellValue::Number(_) => GridCellOpenedState::NoAction,
+        //             GridCellValue::Bomb => GridCellOpenedState::CausedLoss,
+        //         })
+        //     }
+        // }
 
         if let Some(GridCellValue::Number(value)) = start_point_cell_value_option {
             self.cells.visible_count += 1;
@@ -194,29 +190,29 @@ impl Grid {
             if 0 == value {
                 if y_cord > 0 {
                     self.handle_cells_visible(&GridCellPoint {
-                        y: y_cord - 1, 
-                        x: x_cord
+                        y: y_cord - 1,
+                        x: x_cord,
                     });
                 }
 
                 if y_cord < self.size.height {
                     self.handle_cells_visible(&GridCellPoint {
-                        y: y_cord + 1, 
-                        x: x_cord
+                        y: y_cord + 1,
+                        x: x_cord,
                     });
                 }
-    
+
                 if x_cord > 0 {
                     self.handle_cells_visible(&GridCellPoint {
-                        y: y_cord, 
-                        x: x_cord - 1
+                        y: y_cord,
+                        x: x_cord - 1,
                     });
                 }
 
                 if x_cord < self.size.width {
                     self.handle_cells_visible(&GridCellPoint {
-                        y: y_cord, 
-                        x: x_cord + 1
+                        y: y_cord,
+                        x: x_cord + 1,
                     });
                 }
             }
@@ -227,57 +223,71 @@ impl Grid {
 
     pub fn set_all_bombs_visible(&mut self) {
         for bomb_point in self.bombs.points.clone() {
-            if let Some(cell_data) = self.cells.get_existing_cell(&bomb_point) {
+            if let Some(cell_data) = self.cells.get_existing_invisible_cell(&bomb_point) {
                 cell_data.is_visible = true;
             }
         }
     }
 
     pub fn set_all_flagged_cells_to_verify(&mut self) {
-        for flagged_point in self.cells.tagged_points.clone().iter().chain(self.cells.questioned_points.clone().iter()) {
+        for flagged_point in self
+            .cells
+            .tagged_points
+            .clone()
+            .iter()
+            .chain(self.cells.questioned_points.clone().iter())
+        {
             self.cells.set_cell_state_to_verify(&flagged_point);
         }
     }
 
-    // handle_cell_flagged_state
-    pub fn handle_cell_flagged_state(&mut self, point: &GridCellPoint, option_flagged_state: Option<GridCellFlaggedState>) {
-        let mut next_cell_state = None;
+    // pub fn handle_cell_flagged_state(
+    //     &mut self,
+    //     point: &GridCellPoint,
+    //     option_flagged_state: Option<GridCellFlaggedState>,
+    // ) {
+    //     let mut next_cell_state = None;
 
-        if let Some(cell_data) = self.cells.get_existing_cell(point) {
-            if !cell_data.is_visible {
-                match option_flagged_state {
-                    Some(flagged_state) => Some(GridCellState::Flagged(flagged_state)),
-                    None => Some(GridCellState::Idle),
-                }
-                .and_then(|new_state| {
-                    cell_data.state = new_state.clone();
-                    next_cell_state = Some(new_state);
-                    Some(())
-                });
-            }
-        }
+    //     if let Some(cell_data) = self.cells.get_existing_cell(point) {
+    //         if !cell_data.is_visible {
+    //             match option_flagged_state {
+    //                 Some(flagged_state) => Some(GridCellState::Flagged(flagged_state)),
+    //                 None => Some(GridCellState::Idle),
+    //             }
+    //             .and_then(|new_state| {
+    //                 cell_data.state = new_state.clone();
+    //                 next_cell_state = Some(new_state);
+    //                 Some(())
+    //             });
+    //         }
+    //     }
 
-        match next_cell_state {
-            Some(GridCellState::Flagged(GridCellFlaggedState::Tagged)) => {
-                self.cells.tagged_points.push_back(point.clone());
-            },
-            Some(GridCellState::Flagged(GridCellFlaggedState::Questioned)) => {
-                self.cells.tagged_points.remove_point(point);
-                self.cells.questioned_points.push_back(point.clone());
-            },
-            Some(GridCellState::Idle) => {
-                self.cells.questioned_points.remove_point(point);
-            },
-            _ => (),
-        }
-    }
+    //     match next_cell_state {
+    //         Some(GridCellState::Flagged(GridCellFlaggedState::Tagged)) => {
+    //             self.cells.tagged_points.push_back(point.clone());
+    //         }
+    //         Some(GridCellState::Flagged(GridCellFlaggedState::Questioned)) => {
+    //             self.cells.tagged_points.remove_point(point);
+    //             self.cells.questioned_points.push_back(point.clone());
+    //         }
+    //         Some(GridCellState::Idle) => {
+    //             self.cells.questioned_points.remove_point(point);
+    //         }
+    //         _ => (),
+    //     }
+    // }
 
-    fn create_cells_matrix(GridSize { height, width }: &GridSize, non_existing_points: Option<&NonExistedPoints>) -> GridCellMatrix {
+    fn create_cells_matrix(
+        GridSize { height, width }: &GridSize,
+        non_existing_points: Option<&NonExistedPoints>,
+    ) -> GridCellMatrix {
         let mut cells: GridCellMatrix = Vector::new();
 
         let is_point_exist = |point: &GridCellPoint| {
             if let Some(points_vec) = non_existing_points {
-                if let Ok(_) = points_vec.binary_search(point) { return false; }
+                if let Ok(_) = points_vec.binary_search(point) {
+                    return false;
+                }
             }
 
             true
@@ -289,18 +299,16 @@ impl Grid {
             for x in 0..*width {
                 let current_point = GridCellPoint { y, x };
 
-                shape_vec_height.push_back(
-                    GridCell { 
-                        variant: if is_point_exist(&current_point) {
-                            GridCellVariant::Exist(INIT_EXISTING_CELL)
-                        } else {
-                            GridCellVariant::NonExist
-                        },
-                        point: current_point,
-                    }
-                );
+                shape_vec_height.push_back(GridCell {
+                    variant: if is_point_exist(&current_point) {
+                        GridCellVariant::Exist(INIT_EXISTING_CELL)
+                    } else {
+                        GridCellVariant::NonExist
+                    },
+                    point: current_point,
+                });
             }
-            
+
             cells.push_back(shape_vec_height);
         }
 
@@ -312,17 +320,32 @@ impl Grid {
             if let GridCellValue::Number(_) = cell_data.value {
                 cell_data.value = GridCellValue::Bomb;
 
-                let (first_y, adjustment_y) = if point.y > 0 { (point.y - 1, 0) } else { (point.y, 1) };
-                let (first_x, adjustment_x) = if point.x > 0 { (point.x - 1, 0) } else { (point.x, 1) };
+                let (first_y, adjustment_y) = if point.y > 0 {
+                    (point.y - 1, 0)
+                } else {
+                    (point.y, 1)
+                };
+                let (first_x, adjustment_x) = if point.x > 0 {
+                    (point.x - 1, 0)
+                } else {
+                    (point.x, 1)
+                };
 
                 for add_y in 0..(3 - adjustment_y) {
                     for add_x in 0..(3 - adjustment_x) {
                         let search_y = first_y + add_y;
                         let search_x = first_x + add_x;
-                    
-                        if search_y == point.y && search_x == point.x { continue; }
 
-                        if let Some(neighbor_cell_data) = self.cells.get_existing_cell(&GridCellPoint { x: search_x, y: search_y }) {
+                        if search_y == point.y && search_x == point.x {
+                            continue;
+                        }
+
+                        if let Some(neighbor_cell_data) =
+                            self.cells.get_existing_cell(&GridCellPoint {
+                                x: search_x,
+                                y: search_y,
+                            })
+                        {
                             if let GridCellValue::Number(amount) = neighbor_cell_data.value {
                                 neighbor_cell_data.value = GridCellValue::Number(amount + 1);
                             }
@@ -330,7 +353,7 @@ impl Grid {
                     }
                 }
 
-                return Ok(())
+                return Ok(());
             }
         }
 
@@ -347,12 +370,11 @@ impl Grid {
                 y: random_cell / self.size.height,
                 x: random_cell % self.size.height,
             };
-           
+
             if Ok(()) == self.set_bomb_to_cell(&mine_point) {
                 self.bombs.points.push_back(mine_point);
                 mines_created += 1;
             }
         }
     }
-
 }

@@ -1,5 +1,5 @@
-use druid::{Data, Lens};
 use druid::im::Vector;
+use druid::{Data, Lens};
 
 use super::GridSizeUnit;
 
@@ -17,7 +17,7 @@ pub struct GridCellPoint {
 #[derive(PartialEq, Data, Clone)]
 pub enum GridCellFlaggedState {
     Tagged,
-    Questioned
+    Questioned,
 }
 
 #[derive(PartialEq, Data, Clone)]
@@ -51,7 +51,7 @@ pub struct GridExistingCell {
 #[derive(PartialEq, Data, Clone)]
 pub enum GridCellVariant {
     NonExist,
-    Exist(GridExistingCell)
+    Exist(GridExistingCell),
 }
 
 #[derive(Clone, PartialEq, Data, Lens)]
@@ -63,7 +63,7 @@ pub struct GridCell {
 #[derive(Clone, PartialEq, Data, Lens)]
 pub struct GridCellsTagged {
     points: Vector<GridCellPoint>,
-    count: GridSizeUnit
+    count: GridSizeUnit,
 }
 
 #[derive(Clone, PartialEq, Data, Lens)]
@@ -74,6 +74,7 @@ pub struct GridCells {
     pub visible_count: GridSizeUnit,
     pub tagged_points: Vector<GridCellPoint>,
     pub questioned_points: Vector<GridCellPoint>,
+    pub last_interacted_cell_state: Option<GridCellState>,
 }
 
 pub trait RemovePoint {
@@ -97,33 +98,122 @@ impl GridCells {
 
     pub fn get_existing_cell(&mut self, point: &GridCellPoint) -> Option<&mut GridExistingCell> {
         match self.matrix.get_mut(point.y) {
-            Some(row) => {
-                row.get_mut(point.x)
-            },
-            None => { None },
+            Some(row) => row.get_mut(point.x),
+            None => None,
         }
-        .and_then(|cell| {
-            match &mut cell.variant {
-                GridCellVariant::NonExist => None,
-                GridCellVariant::Exist(cell_data) => Some(cell_data),
-            }
+        .and_then(|cell| match &mut cell.variant {
+            GridCellVariant::NonExist => None,
+            GridCellVariant::Exist(cell_data) => Some(cell_data),
         })
     }
 
-    pub fn set_cell_state(&mut self, point: &GridCellPoint, state: GridCellState) {
-        if let Some(cell_data) = self.get_existing_cell(point) {
-            cell_data.state = state;
-        }
+    pub fn get_existing_visible_cell(
+        &mut self,
+        point: &GridCellPoint,
+    ) -> Option<&mut GridExistingCell> {
+        self.get_existing_cell(point).and_then(
+            |cell| {
+                if cell.is_visible {
+                    Some(cell)
+                } else {
+                    None
+                }
+            },
+        )
     }
 
-    pub fn set_cell_state_to_verify(&mut self, point: &GridCellPoint) {
+    pub fn get_existing_invisible_cell(
+        &mut self,
+        point: &GridCellPoint,
+    ) -> Option<&mut GridExistingCell> {
+        self.get_existing_cell(point).and_then(
+            |cell| {
+                if !cell.is_visible {
+                    Some(cell)
+                } else {
+                    None
+                }
+            },
+        )
+    }
+
+    pub fn set_cell_state(&mut self, point: &GridCellPoint, state: GridCellState) -> &mut Self {
+        if let Some(cell_data) = self.get_existing_invisible_cell(point) {
+            cell_data.state = state;
+        }
+
+        self
+    }
+
+    pub fn set_cell_idle_state(&mut self, point: &GridCellPoint) -> &mut Self {
+        self.get_existing_invisible_cell(point).and_then(|cell| {
+            if cell.state == GridCellState::Active {
+                cell.state = GridCellState::Idle;
+            }
+            Some(())
+        });
+
+        self
+    }
+
+    pub fn set_cell_active_state(&mut self, point: &GridCellPoint) -> &mut Self {
+        self.get_existing_invisible_cell(point).and_then(|cell| {
+            if cell.state == GridCellState::Idle {
+                cell.state = GridCellState::Active;
+            }
+            Some(())
+        });
+
+        self
+    }
+
+    pub fn toggle_cell_flagged_state(&mut self, point: &GridCellPoint) -> &mut Self {
+        let mut next_cell_state = None;
+
+        if let Some(cell) = self.get_existing_invisible_cell(point) {
+            next_cell_state = match cell.state {
+                GridCellState::Idle => Some(GridCellState::Flagged(GridCellFlaggedState::Tagged)),
+                GridCellState::Flagged(GridCellFlaggedState::Tagged) => {
+                    Some(GridCellState::Flagged(GridCellFlaggedState::Questioned))
+                }
+                GridCellState::Flagged(GridCellFlaggedState::Questioned) => {
+                    Some(GridCellState::Idle)
+                }
+                _ => None,
+            }
+            .and_then(|next_state| {
+                cell.state = next_state.clone();
+                Some(next_state)
+            });
+        }
+
+        match next_cell_state {
+            Some(GridCellState::Flagged(GridCellFlaggedState::Tagged)) => {
+                self.tagged_points.push_back(point.clone());
+            }
+            Some(GridCellState::Flagged(GridCellFlaggedState::Questioned)) => {
+                self.tagged_points.remove_point(point);
+                self.questioned_points.push_back(point.clone());
+            }
+            Some(GridCellState::Idle) => {
+                self.questioned_points.remove_point(point);
+            }
+            _ => (),
+        }
+
+        self
+    }
+
+    pub fn set_cell_state_to_verify(&mut self, point: &GridCellPoint) -> &mut Self {
         if let Some(cell_data) = self.get_existing_cell(point) {
             match &cell_data.state {
                 GridCellState::Flagged(flagged_state) => {
                     cell_data.state = GridCellState::ToVerifyFlag(flagged_state.clone());
-                },
-                _ => ()
+                }
+                _ => (),
             }
         }
+
+        self
     }
-} 
+}
