@@ -6,7 +6,6 @@ use crate::assets::{
     FACE_ACTIVE, FACE_IDLE, FACE_LOSS, FACE_WIN, TILE_OPENED_SVG_BG, TILE_UNOPENED_SVG_BG,
 };
 use crate::game::{Game, GameEndState, GameState};
-use crate::grid::GridCellState;
 
 pub fn get_btn_painter() -> Painter<Game> {
     Painter::new(move |ctx, game: &Game, env| {

@@ -1,19 +1,11 @@
 use druid::{AppDelegate, Command, DelegateCtx, Env, Handled, Selector, Target};
 
 use crate::app::AppState;
-use crate::consts::TIMER_INTERVAL;
 use crate::game::{Game, GameState};
-use crate::grid::{
-    Grid, GridCell, GridCellFlaggedState, GridCellPoint, GridCellState, GridExistingCell,
-};
+use crate::grid::GridCellPoint;
 
-// pub const HANDLE_CELL_OPEN: Selector<GridCellPoint> = Selector::new("HANDLE_CELL_OPEN");
-// pub const HANDLE_CELL_TOGGLE_HOVER: Selector<(GridCellPoint, GridCellState)> =
-//     Selector::new("HANDLE_CELL_TOGGLE_HOVER");
-// pub const HANDLE_CELL_FLAGGING: Selector<(GridCellPoint, Option<GridCellFlaggedState>)> =
-//     Selector::new("HANDLE_CELL_FLAGGING");
+#[allow(dead_code)]
 pub const HANDLE_TIMER: Selector = Selector::new("HANDLE_TIMER");
-// pub const HANDLE_ACTIVE_GRID: Selector<bool> = Selector::new("HANDLE_ACTIVE_GRID");
 
 // New delagate for grid
 pub const CELL_ACTIVE_BY_MULTIPLE_POINTS: Selector<Vec<GridCellPoint>> =

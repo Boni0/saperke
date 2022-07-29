@@ -9,7 +9,7 @@ use crate::consts::BACKGROUND_COLOR_HEX;
 use crate::game::Game;
 use crate::grid::Grid;
 use crate::AppState;
-use druid::widget::{Container, Flex, LensWrap};
+use druid::widget::{Flex, LensWrap};
 use druid::{lens, Color, LensExt, Widget, WidgetExt};
 
 pub use grid::GridWidget;

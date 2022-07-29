@@ -107,6 +107,7 @@ impl GridCells {
         })
     }
 
+    #[allow(dead_code)]
     pub fn get_existing_visible_cell(
         &mut self,
         point: &GridCellPoint,

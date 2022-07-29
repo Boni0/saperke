@@ -7,6 +7,7 @@ pub type GridShapeSizeUnit = usize;
 
 pub type NonExistedPoints = Vector<GridCellPoint>;
 
+#[allow(dead_code)]
 #[derive(Clone, PartialEq, Data)]
 pub enum GridShape {
     RectangleOrSquare,

@@ -19,8 +19,6 @@ pub use shape_size::{GridShape, GridShapeSizeUnit, GridSize, NonExistedPoints};
 
 pub use bombs::{BombsPoints, GridBombs, GridBombsConfig, GridBombsPropagation};
 
-use self::cells::RemovePoint;
-
 #[derive(Clone, Data, Lens)]
 pub struct Grid {
     pub size: GridSize,

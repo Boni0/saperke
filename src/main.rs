@@ -14,6 +14,7 @@ use consts::{TIMER_INTERVAL, TITLE};
 use delegate::{MainDelegate, HANDLE_TIMER};
 use game::Game;
 
+#[allow(dead_code)]
 fn create_timer(event_sink: ExtEventSink) {
     loop {
         event_sink

@@ -1,18 +1,14 @@
-use druid::im::Vector;
 use druid::widget::Controller;
-use druid::{Env, Event, EventCtx, Handled, MouseButton, MouseEvent, Point, Widget};
+use druid::{Env, Event, EventCtx, MouseButton, Point, Widget};
 
-use crate::consts::{GRID_CELL_HEIGHT, GRID_CELL_WIDTH};
+use crate::consts::GRID_CELL_WIDTH;
 
 use crate::delegate::{
     CELL_ACTIVE_BY_MULTIPLE_POINTS, CELL_IDLE_BY_MULTIPLE_POINTS, CELL_OPEN_BY_POINT,
     CELL_TOGGLE_FLAG_BY_POINT,
 };
-use crate::game::{Game, GameState};
-use crate::grid::{
-    Grid, GridCell, GridCellFlaggedState, GridCellPoint, GridCellState, GridCellVariant,
-    GridExistingCell,
-};
+
+use crate::grid::{Grid, GridCellPoint};
 
 pub struct GridController {
     pub last_button_clicked: MouseButton,

@@ -11,15 +11,16 @@ pub enum GridBombsPropagation {
     Selected,
 }
 
+#[allow(dead_code)]
 #[derive(Clone, Data, PartialEq)]
 pub enum GridBombsConfig {
     Randomized(GridSizeUnit),
-    Selected(BombsPoints)
+    Selected(BombsPoints),
 }
 
 #[derive(Clone, Data, Lens, PartialEq)]
 pub struct GridBombs {
     pub propagation: GridBombsPropagation,
     pub count: GridSizeUnit,
-    pub points: BombsPoints
+    pub points: BombsPoints,
 }

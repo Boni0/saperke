@@ -2,7 +2,7 @@ mod utils;
 
 use std::convert::TryInto;
 
-use druid::widget::{Button, Flex, SizedBox};
+use druid::widget::{Flex, SizedBox};
 use druid::{lens, LensExt, Widget, WidgetExt};
 
 use crate::app::AppState;
