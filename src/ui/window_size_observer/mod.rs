@@ -4,17 +4,31 @@ use druid::{
 };
 
 use crate::{
-    consts::{GRID_CELL_HEIGHT, GRID_CELL_WIDTH},
+    consts::{
+        BORDER_SIZE, FLEX_COMMON_SPACING_SIZE, GRID_CELL_HEIGHT, GRID_CELL_WIDTH,
+        TIMER_COLUMN_HEIGHT,
+    },
     grid::GridSize,
 };
 
-pub struct WindowSizeObserverWidget;
+const HORIZONTAL_SPACING: f64 = FLEX_COMMON_SPACING_SIZE * 2.0;
+const HORIZONTAL_BORDERS: f64 = BORDER_SIZE * 4.0;
 
+const VERTICAL_SPACING: f64 = FLEX_COMMON_SPACING_SIZE * 3.0;
+const VERTICAL_BORDERS: f64 = BORDER_SIZE * 6.0;
+const VERTICAL_EXTRA_SIZES: f64 = TIMER_COLUMN_HEIGHT + FLEX_COMMON_SPACING_SIZE;
+
+pub struct WindowSizeObserverWidget;
 impl WindowSizeObserverWidget {
     fn set_window_size(&self, window_handle: &WindowHandle, size: &GridSize) {
         window_handle.set_size(Size {
-            width: (GRID_CELL_WIDTH * (size.width as f64)) + 50.0,
-            height: (GRID_CELL_HEIGHT * (size.height as f64)) + 150.0,
+            width: (GRID_CELL_WIDTH * (size.width as f64))
+                + HORIZONTAL_SPACING
+                + HORIZONTAL_BORDERS,
+            height: (GRID_CELL_HEIGHT * (size.height as f64))
+                + VERTICAL_SPACING
+                + VERTICAL_BORDERS
+                + VERTICAL_EXTRA_SIZES,
         })
     }
 }

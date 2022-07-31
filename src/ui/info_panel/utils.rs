@@ -16,7 +16,11 @@ pub fn get_btn_painter() -> Painter<Game> {
         }) {
             Svg::new(bg_svg).paint(ctx, game, env);
         }
+    })
+}
 
+pub fn get_btn_icon_face_painter() -> Painter<Game> {
+    Painter::new(move |ctx, game: &Game, env| {
         if let Ok(face_svg) = SvgData::from_str(match game.state {
             GameState::EndState(GameEndState::Win) => FACE_WIN,
             GameState::EndState(GameEndState::Loss) => FACE_LOSS,

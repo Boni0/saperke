@@ -15,3 +15,5 @@ pub const TIMER_INTERVAL: Duration = Duration::from_millis(10);
 
 pub const GRID_CELL_WIDTH: f64 = 23.0;
 pub const GRID_CELL_HEIGHT: f64 = 23.0;
+
+pub const FLEX_COMMON_SPACING_SIZE: f64 = 10.0;

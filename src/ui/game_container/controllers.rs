@@ -1,5 +1,5 @@
 use druid::widget::Controller;
-use druid::{Env, Event, EventCtx, MouseButton, Widget};
+use druid::{Env, Event, EventCtx, Widget};
 
 use crate::game::{Game, GameState};
 
@@ -18,15 +18,21 @@ where
     ) {
         let hot = ctx.is_hot();
 
-        if let GameState::EndState(_) = data.state {
+        data.grid.is_active = if let GameState::EndState(_) = data.state {
+            false
         } else {
-            data.grid.is_active = match event {
-                Event::MouseDown(event) | Event::MouseMove(event) => {
-                    hot && event.buttons.contains(MouseButton::Left)
+            hot && match event {
+                Event::MouseDown(mouse_event) | Event::MouseMove(mouse_event) => {
+                    (mouse_event.buttons.has_left()
+                        && !mouse_event.buttons.has_middle()
+                        && !mouse_event.buttons.has_right())
+                        || (mouse_event.buttons.has_middle()
+                            || (mouse_event.buttons.has_left() && mouse_event.buttons.has_right())
+                            || (mouse_event.buttons.has_right() && mouse_event.buttons.has_left()))
                 }
                 _ => false,
             }
-        }
+        };
 
         child.event(ctx, event, data, env)
     }
