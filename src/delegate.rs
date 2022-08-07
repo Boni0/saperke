@@ -4,10 +4,6 @@ use crate::app::AppState;
 use crate::game::{Game, GameState};
 use crate::grid::GridCellPoint;
 
-#[allow(dead_code)]
-pub const HANDLE_TIMER: Selector = Selector::new("HANDLE_TIMER");
-
-// New delagate for grid
 pub const CELL_ACTIVE_BY_MULTIPLE_POINTS: Selector<Vec<GridCellPoint>> =
     Selector::new("CELL_ACTIVE_BY_MULTIPLE_POINTS");
 
@@ -54,8 +50,8 @@ impl AppDelegate<AppState> for MainDelegate {
             }
 
             if let Some(point) = cmd.get(CELL_OPEN_BY_POINT) {
-                if state.game.state == GameState::NotStarted {
-                    state.game.state = GameState::Running
+                if game_clone.state == GameState::NotStarted {
+                    game_clone.state = GameState::Running
                 }
 
                 game_clone.handle_cell_open(point);
@@ -66,13 +62,6 @@ impl AppDelegate<AppState> for MainDelegate {
                 state.game = game_clone;
             }
         }
-
-        // if let Some(_) = cmd.get(HANDLE_TIMER) {
-        //     if state.game.state == GameState::Running {
-        //         state.game.time += TIMER_INTERVAL;
-        //         return Handled::Yes;
-        //     }
-        // }
 
         delegate_handled
     }

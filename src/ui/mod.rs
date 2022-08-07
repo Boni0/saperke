@@ -1,8 +1,10 @@
 mod border_box;
+mod final_time_status;
 mod game_container;
 mod grid;
 mod info_panel;
 mod three_column_counter;
+mod timer_observer;
 mod window_size_observer;
 
 use crate::consts::{BACKGROUND_COLOR_HEX, FLEX_COMMON_SPACING_SIZE};
@@ -19,6 +21,8 @@ pub use window_size_observer::WindowSizeObserverWidget;
 
 use self::border_box::{BorderBox, BorderColorPattern};
 use self::game_container::GameContainerWidget;
+use final_time_status::FinalTimeStatus;
+use timer_observer::TimerObserver;
 
 pub fn build() -> impl Widget<AppState> {
     let mut flex = Flex::column();
@@ -31,6 +35,9 @@ pub fn build() -> impl Widget<AppState> {
             .then(lens!(Grid, size)),
     ));
 
+    // Invisible Game Timer observer
+    flex.add_child(LensWrap::new(TimerObserver::new(), lens!(AppState, game)));
+
     flex.add_child(InfoPanel::new());
     flex.add_spacer(FLEX_COMMON_SPACING_SIZE);
 
@@ -38,7 +45,7 @@ pub fn build() -> impl Widget<AppState> {
         GameContainerWidget::new(),
         lens!(AppState, game),
     ));
-    flex.add_spacer(FLEX_COMMON_SPACING_SIZE);
+    flex.add_child(LensWrap::new(FinalTimeStatus::new(), lens!(AppState, game)));
 
     BorderBox::new(
         flex.padding(FLEX_COMMON_SPACING_SIZE).center(),

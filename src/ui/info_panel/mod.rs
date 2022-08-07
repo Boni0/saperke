@@ -62,7 +62,7 @@ impl InfoPanelFlex {
         );
 
         flex.add_child(ThreeColumnCounter::new().lens(lens::Identity.map(
-            |state: &AppState| state.game.time.as_secs().try_into().unwrap(),
+            |state: &AppState| state.game.time.display_time_in_sec as i64,
             |_, _| {},
         )));
 
