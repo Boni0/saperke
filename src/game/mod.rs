@@ -1,9 +1,7 @@
 mod state;
 mod time;
 
-use crate::grid::{
-    Grid, GridBombsConfig, GridCellPoint, GridCellState, GridCellValue, GridShape, GridSize,
-};
+use crate::grid::{Grid, GridBombsConfig, GridCellPoint, GridCellValue, GridShape, GridSize};
 use druid::{Data, Lens};
 
 pub use state::{GameEndState, GameState};
@@ -49,31 +47,27 @@ impl Game {
             self.state = GameState::Running;
         }
 
-        let mut grid_clone = Clone::clone(&self.grid);
-        grid_clone.cells.set_cell_state(point, GridCellState::Idle);
-
-        grid_clone
+        self.grid
             .handle_cells_visible(point)
             .and_then(|value_of_first_visible_cell| {
                 let mut end_state_option = None;
 
                 match value_of_first_visible_cell {
                     GridCellValue::Number(_) => {
-                        if grid_clone.cells.visible_count
-                            == (grid_clone.cells.exist_count - grid_clone.bombs.count)
+                        if self.grid.cells.visible_count
+                            == (self.grid.cells.exist_count - self.grid.bombs.count)
                         {
                             end_state_option = Some(GameEndState::Win);
                         }
                     }
                     GridCellValue::Bomb => {
-                        grid_clone.set_all_bombs_visible();
-                        grid_clone.set_all_flagged_cells_to_verify();
+                        self.grid.set_all_bombs_visible();
+                        self.grid.set_all_flagged_cells_to_verify();
 
                         end_state_option = Some(GameEndState::Loss);
                     }
                 }
 
-                self.grid = grid_clone;
                 end_state_option
             })
             .and_then(|end_state| {

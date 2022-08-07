@@ -138,6 +138,7 @@ impl GridCells {
         )
     }
 
+    #[allow(dead_code)]
     pub fn set_cell_state(&mut self, point: &GridCellPoint, state: GridCellState) -> &mut Self {
         if let Some(cell_data) = self.get_existing_invisible_cell(point) {
             cell_data.state = state;

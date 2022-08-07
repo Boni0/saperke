@@ -149,12 +149,18 @@ impl Grid {
             y: y_cord,
             x: x_cord,
         } = *start_point;
-        // let mut start_point_cell_value_option = None;
 
         let start_point_cell_value_option = self
             .cells
             .set_cell_idle_state(start_point)
             .get_existing_invisible_cell(start_point)
+            .and_then(|cell_data| {
+                if let GridCellState::Flagged(_) = cell_data.state {
+                    None
+                } else {
+                    Some(cell_data)
+                }
+            })
             .and_then(|cell_data| {
                 cell_data.is_visible = true;
 
@@ -165,22 +171,6 @@ impl Grid {
 
                 Some(cell_data.value)
             });
-
-        // if let Some(cell_data) = self.cells.get_existing_invisible_cell(start_point) {
-        //     if cell_data.state == GridCellState::Active {
-        //         cell_data.state = GridCellState::Idle;
-        //     }
-
-        //     if cell_data.state == GridCellState::Idle {
-        //         cell_data.is_visible = true;
-        //         start_point_cell_value_option = Some(cell_data.value.clone());
-
-        //         cell_data.state = GridCellState::Opened(match cell_data.value {
-        //             GridCellValue::Number(_) => GridCellOpenedState::NoAction,
-        //             GridCellValue::Bomb => GridCellOpenedState::CausedLoss,
-        //         })
-        //     }
-        // }
 
         if let Some(GridCellValue::Number(value)) = start_point_cell_value_option {
             self.cells.visible_count += 1;
@@ -238,42 +228,6 @@ impl Grid {
             self.cells.set_cell_state_to_verify(&flagged_point);
         }
     }
-
-    // pub fn handle_cell_flagged_state(
-    //     &mut self,
-    //     point: &GridCellPoint,
-    //     option_flagged_state: Option<GridCellFlaggedState>,
-    // ) {
-    //     let mut next_cell_state = None;
-
-    //     if let Some(cell_data) = self.cells.get_existing_cell(point) {
-    //         if !cell_data.is_visible {
-    //             match option_flagged_state {
-    //                 Some(flagged_state) => Some(GridCellState::Flagged(flagged_state)),
-    //                 None => Some(GridCellState::Idle),
-    //             }
-    //             .and_then(|new_state| {
-    //                 cell_data.state = new_state.clone();
-    //                 next_cell_state = Some(new_state);
-    //                 Some(())
-    //             });
-    //         }
-    //     }
-
-    //     match next_cell_state {
-    //         Some(GridCellState::Flagged(GridCellFlaggedState::Tagged)) => {
-    //             self.cells.tagged_points.push_back(point.clone());
-    //         }
-    //         Some(GridCellState::Flagged(GridCellFlaggedState::Questioned)) => {
-    //             self.cells.tagged_points.remove_point(point);
-    //             self.cells.questioned_points.push_back(point.clone());
-    //         }
-    //         Some(GridCellState::Idle) => {
-    //             self.cells.questioned_points.remove_point(point);
-    //         }
-    //         _ => (),
-    //     }
-    // }
 
     fn create_cells_matrix(
         GridSize { height, width }: &GridSize,
