@@ -1,7 +1,7 @@
 use druid::widget::Controller;
 use druid::{Env, Event, EventCtx, MouseButton, Point, Widget};
 
-use crate::consts::GRID_CELL_WIDTH;
+use crate::consts::{GRID_CELL_HEIGHT, GRID_CELL_WIDTH};
 
 use crate::delegate::{
     CELL_ACTIVE_BY_MULTIPLE_POINTS, CELL_IDLE_BY_MULTIPLE_POINTS, CELL_OPEN_BY_POINT,
@@ -40,12 +40,12 @@ where
             Event::MouseDown(event) | Event::MouseUp(event) | Event::MouseMove(event) => {
                 let Point { x, y } = event.pos;
                 let x = x / GRID_CELL_WIDTH;
-                let y = y / GRID_CELL_WIDTH;
+                let y = y / GRID_CELL_HEIGHT;
 
                 if x >= 0.0
                     && x <= (data.size.width as f64)
                     && y > 0.0
-                    && x <= (data.size.height as f64)
+                    && y <= (data.size.height as f64)
                 {
                     let grid_cell_point = GridCellPoint {
                         x: x as usize,

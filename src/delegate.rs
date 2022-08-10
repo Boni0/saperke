@@ -1,7 +1,7 @@
 use druid::{AppDelegate, Command, DelegateCtx, Env, Handled, Selector, Target};
 
 use crate::app::AppState;
-use crate::game::{Game, GameState};
+use crate::game::{Game, GameDifficultyGrid, GameState, StandardGameDifficulty};
 use crate::grid::GridCellPoint;
 
 pub const CELL_ACTIVE_BY_MULTIPLE_POINTS: Selector<Vec<GridCellPoint>> =
@@ -13,6 +13,9 @@ pub const CELL_IDLE_BY_MULTIPLE_POINTS: Selector<Vec<GridCellPoint>> =
 pub const CELL_TOGGLE_FLAG_BY_POINT: Selector<GridCellPoint> =
     Selector::new("CELL_TOGGLE_FLAG_BY_POINT");
 pub const CELL_OPEN_BY_POINT: Selector<GridCellPoint> = Selector::new("CELL_OPEN_BY_POINT");
+
+pub const RESTART_GAME: Selector = Selector::new("NEW_GAME");
+pub const NEW_GAME_STANDARD: Selector<StandardGameDifficulty> = Selector::new("NEW_GAME_STANDARD");
 
 pub struct MainDelegate;
 
@@ -62,6 +65,16 @@ impl AppDelegate<AppState> for MainDelegate {
                 state.game = game_clone;
             }
         }
+
+        // if cmd.is(RESTART_GAME) {
+        //     state.game.restart();
+        //     delegate_handled = Handled::Yes;
+        // }
+
+        // if let Some(standard_difficulty) = cmd.get(NEW_GAME_STANDARD) {
+        //     state.game = Game::new(GameDifficultyGrid::Standard(standard_difficulty.clone()));
+        //     delegate_handled = Handled::Yes;
+        // }
 
         delegate_handled
     }

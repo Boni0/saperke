@@ -5,7 +5,7 @@ use druid::{
 
 use crate::{
     consts::{
-        BORDER_SIZE, FLEX_COMMON_SPACING_SIZE, GRID_CELL_HEIGHT, GRID_CELL_WIDTH,
+        BORDER_SIZE, FLEX_COMMON_SPACING_SIZE, GRID_CELL_HEIGHT, GRID_CELL_WIDTH, MENU_HEIGHT,
         TIMER_COLUMN_HEIGHT,
     },
     grid::GridSize,
@@ -26,6 +26,7 @@ impl WindowSizeObserverWidget {
                 + HORIZONTAL_SPACING
                 + HORIZONTAL_BORDERS,
             height: (GRID_CELL_HEIGHT * (size.height as f64))
+                + MENU_HEIGHT
                 + VERTICAL_SPACING
                 + VERTICAL_BORDERS
                 + VERTICAL_EXTRA_SIZES,

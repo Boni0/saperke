@@ -16,3 +16,17 @@ pub const GRID_CELL_WIDTH: f64 = 23.0;
 pub const GRID_CELL_HEIGHT: f64 = 23.0;
 
 pub const FLEX_COMMON_SPACING_SIZE: f64 = 10.0;
+
+pub const MENU_HEIGHT: f64 = 25.0;
+
+// pub const MENU_GAME: &str = "Game";
+// pub const MENU_GAME_NEW: &str = "New";
+// pub const MENU_GAME_PAUSE: &str = "Pause";
+
+// pub const MENU_GAME_BEGINNER: &str = "Beginner";
+// pub const MENU_GAME_INTERMEDIATE: &str = "Intermediate";
+// pub const MENU_GAME_EXPERT: &str = "Expert";
+// pub const MENU_GAME_CUSTOM: &str = "Custom";
+
+// pub const MENU_GAME_ABOUT: &str = "About";
+// pub const MENU_GAME_EXIST: &str = "Exist";

@@ -1,9 +1,14 @@
+mod difficulty;
 mod state;
 mod time;
 
 use crate::grid::{Grid, GridBombsConfig, GridCellPoint, GridCellValue, GridShape, GridSize};
 use druid::{Data, Lens};
 
+pub use difficulty::{
+    DimensionBombsAmountSettingsTuple, DimensionNonExistedPointsBombsAmountSettingsTuple,
+    GameDifficultyGrid, StandardGameDifficulty,
+};
 pub use state::{GameEndState, GameState};
 
 use self::time::GameTime;
@@ -16,21 +21,9 @@ pub struct Game {
 }
 
 impl Game {
-    pub fn new() -> Game {
-        let test_width: usize = 24;
-        let test_height: usize = 24;
-
-        let grid = Grid::new(
-            GridSize {
-                width: test_width,
-                height: test_height,
-            },
-            GridShape::RectangleOrSquare,
-            &GridBombsConfig::Randomized(10),
-        );
-
+    pub fn new(difficulty: GameDifficultyGrid) -> Game {
         Game {
-            grid,
+            grid: Grid::from_difficulty(difficulty),
             state: GameState::NotStarted,
             time: GameTime::new(),
         }

@@ -19,6 +19,8 @@ pub use shape_size::{GridShape, GridShapeSizeUnit, GridSize, NonExistedPoints};
 
 pub use bombs::{BombsPoints, GridBombs, GridBombsConfig, GridBombsPropagation};
 
+use crate::game::{GameDifficultyGrid, StandardGameDifficulty};
+
 #[derive(Clone, Data, Lens)]
 pub struct Grid {
     pub size: GridSize,
@@ -117,6 +119,36 @@ impl Grid {
         grid.set_bombs_to_grid_randomly(random_mines_count);
 
         grid
+    }
+
+    pub fn from_difficulty(difficulty: GameDifficultyGrid) -> Self {
+        let mut non_existed_points: Option<NonExistedPoints> = None;
+
+        let (width, height, bombs_amount) = match difficulty {
+            GameDifficultyGrid::Standard(StandardGameDifficulty::Beginner) => (9, 9, 10),
+            GameDifficultyGrid::Standard(StandardGameDifficulty::Intermediate) => (16, 16, 40),
+            GameDifficultyGrid::Standard(StandardGameDifficulty::Expert) => (30, 16, 99),
+            GameDifficultyGrid::CustomRectangleOrSquareRandom(cfg) => cfg,
+            GameDifficultyGrid::UnusualRandom((
+                width,
+                heigth,
+                non_existed_points_vec,
+                bombs_amount,
+            )) => {
+                non_existed_points = Some(non_existed_points_vec);
+                (width, heigth, bombs_amount)
+            }
+        };
+
+        let size = GridSize { width, height };
+        let bombs_config = GridBombsConfig::Randomized(bombs_amount);
+
+        let shape = match non_existed_points {
+            Some(non_existed_points_vec) => GridShape::Unusual(non_existed_points_vec),
+            None => GridShape::RectangleOrSquare,
+        };
+
+        Grid::new(size, shape, &bombs_config)
     }
 
     pub fn refresh(&mut self) {
@@ -318,9 +350,10 @@ impl Grid {
 
         while mines_created < mines_count {
             let random_cell = rng.gen_range(0..self.cells.all_count);
+
             let mine_point = GridCellPoint {
-                y: random_cell / self.size.height,
-                x: random_cell % self.size.height,
+                y: random_cell % self.size.height,
+                x: random_cell % self.size.width,
             };
 
             if Ok(()) == self.set_bomb_to_cell(&mine_point) {
