@@ -1,8 +1,9 @@
-use druid::Data;
-
 use crate::grid::{GridShapeSizeUnit, GridSizeUnit, NonExistedPoints};
 
+// (Width, Height, Mines)
 pub type DimensionBombsAmountSettingsTuple = (GridShapeSizeUnit, GridShapeSizeUnit, GridSizeUnit);
+
+// (Width, Height, Empty Points Vec, Mines)
 pub type DimensionNonExistedPointsBombsAmountSettingsTuple = (
     GridShapeSizeUnit,
     GridShapeSizeUnit,

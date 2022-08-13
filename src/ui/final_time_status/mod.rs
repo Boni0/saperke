@@ -1,6 +1,6 @@
 use druid::{
     widget::{Either, Label, SizedBox},
-    Color, Widget,
+    Color, Widget, WidgetExt,
 };
 
 use crate::game::Game;
@@ -20,7 +20,7 @@ impl FinalTimeStatus {
         Either::new(
             |game: &Game, _| !(game.time.final_time_duration.as_millis() == 0),
             label,
-            SizedBox::empty(),
+            SizedBox::empty().padding(5.0),
         )
     }
 }

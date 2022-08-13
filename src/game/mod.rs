@@ -2,7 +2,7 @@ mod difficulty;
 mod state;
 mod time;
 
-use crate::grid::{Grid, GridBombsConfig, GridCellPoint, GridCellValue, GridShape, GridSize};
+use crate::grid::{Grid, GridCellPoint, GridCellValue};
 use druid::{Data, Lens};
 
 pub use difficulty::{

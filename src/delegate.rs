@@ -1,8 +1,15 @@
-use druid::{AppDelegate, Command, DelegateCtx, Env, Handled, Selector, Target};
+use druid::commands::QUIT_APP;
+use druid::{
+    AppDelegate, Command, DelegateCtx, Env, Handled, Selector, Size, Target, WindowDesc, WindowId,
+};
 
 use crate::app::AppState;
-use crate::game::{Game, GameDifficultyGrid, GameState, StandardGameDifficulty};
+use crate::consts::{CUSTOM_GAME_SUBTITLE, TITLE};
+use crate::game::{
+    DimensionBombsAmountSettingsTuple, Game, GameDifficultyGrid, GameState, StandardGameDifficulty,
+};
 use crate::grid::GridCellPoint;
+use crate::ui;
 
 pub const CELL_ACTIVE_BY_MULTIPLE_POINTS: Selector<Vec<GridCellPoint>> =
     Selector::new("CELL_ACTIVE_BY_MULTIPLE_POINTS");
@@ -16,13 +23,49 @@ pub const CELL_OPEN_BY_POINT: Selector<GridCellPoint> = Selector::new("CELL_OPEN
 
 pub const RESTART_GAME: Selector = Selector::new("NEW_GAME");
 pub const NEW_GAME_STANDARD: Selector<StandardGameDifficulty> = Selector::new("NEW_GAME_STANDARD");
+pub const NEW_GAME_CUSTOM_RECTANGLE_OR_SQUARE: Selector<DimensionBombsAmountSettingsTuple> =
+    Selector::new("NEW_GAME_CUSTOM_RECTANGLE_OR_SQUARE");
+pub const OPEN_CUSTOM_GAME_WINDOW: Selector = Selector::new("OPEN_CUSTOM_GAME_WINDOW");
+pub struct MainDelegate {
+    pub app_window_id: WindowId,
+    pub custom_game_window_id: Option<WindowId>,
+    pub about_window_id: Option<WindowId>,
+}
 
-pub struct MainDelegate;
+impl MainDelegate {
+    pub fn new(app_window_id: WindowId) -> Self {
+        Self {
+            app_window_id,
+            custom_game_window_id: None,
+            about_window_id: None,
+        }
+    }
+}
 
 impl AppDelegate<AppState> for MainDelegate {
+    fn window_removed(
+        &mut self,
+        id: druid::WindowId,
+        _data: &mut AppState,
+        _env: &Env,
+        ctx: &mut DelegateCtx,
+    ) {
+        if id == self.app_window_id {
+            ctx.submit_command(QUIT_APP);
+        } else if let Some(custom_window_id) = self.custom_game_window_id {
+            if id == custom_window_id {
+                self.custom_game_window_id = None;
+            }
+        } else if let Some(about_window_id) = self.about_window_id {
+            if id == about_window_id {
+                self.about_window_id = None;
+            }
+        }
+    }
+
     fn command(
         &mut self,
-        _ctx: &mut DelegateCtx,
+        ctx: &mut DelegateCtx,
         _target: Target,
         cmd: &Command,
         state: &mut AppState,
@@ -66,15 +109,41 @@ impl AppDelegate<AppState> for MainDelegate {
             }
         }
 
-        // if cmd.is(RESTART_GAME) {
-        //     state.game.restart();
-        //     delegate_handled = Handled::Yes;
-        // }
+        if cmd.is(RESTART_GAME) {
+            state.game.restart();
+            delegate_handled = Handled::Yes;
+        }
 
-        // if let Some(standard_difficulty) = cmd.get(NEW_GAME_STANDARD) {
-        //     state.game = Game::new(GameDifficultyGrid::Standard(standard_difficulty.clone()));
-        //     delegate_handled = Handled::Yes;
-        // }
+        if let Some(standard_difficulty) = cmd.get(NEW_GAME_STANDARD) {
+            state.game = Game::new(GameDifficultyGrid::Standard(standard_difficulty.clone()));
+            delegate_handled = Handled::Yes;
+        }
+
+        if let Some(options_tuple) = cmd.get(NEW_GAME_CUSTOM_RECTANGLE_OR_SQUARE) {
+            state.game = Game::new(GameDifficultyGrid::CustomRectangleOrSquareRandom(
+                options_tuple.clone(),
+            ));
+            delegate_handled = Handled::Yes;
+        }
+
+        if cmd.is(OPEN_CUSTOM_GAME_WINDOW) && self.custom_game_window_id == None {
+            let custom_game_window = WindowDesc::new(ui::custom_game_window_build);
+            self.custom_game_window_id = Some(custom_game_window.id);
+
+            ctx.new_window(
+                custom_game_window
+                    .title(format!("{} - {}", TITLE, CUSTOM_GAME_SUBTITLE))
+                    .resizable(false)
+                    .with_min_size(Size {
+                        width: 0.0,
+                        height: 0.0,
+                    })
+                    .window_size(Size {
+                        width: 350.0,
+                        height: 150.0,
+                    }),
+            )
+        }
 
         delegate_handled
     }

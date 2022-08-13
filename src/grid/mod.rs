@@ -19,6 +19,9 @@ pub use shape_size::{GridShape, GridShapeSizeUnit, GridSize, NonExistedPoints};
 
 pub use bombs::{BombsPoints, GridBombs, GridBombsConfig, GridBombsPropagation};
 
+use crate::consts::{
+    GAME_BEGINNER_DIFFICULTY, GAME_EXPERT_DIFFICULTY, GAME_INTERMEDIATE_DIFFICULTY,
+};
 use crate::game::{GameDifficultyGrid, StandardGameDifficulty};
 
 #[derive(Clone, Data, Lens)]
@@ -125,9 +128,13 @@ impl Grid {
         let mut non_existed_points: Option<NonExistedPoints> = None;
 
         let (width, height, bombs_amount) = match difficulty {
-            GameDifficultyGrid::Standard(StandardGameDifficulty::Beginner) => (9, 9, 10),
-            GameDifficultyGrid::Standard(StandardGameDifficulty::Intermediate) => (16, 16, 40),
-            GameDifficultyGrid::Standard(StandardGameDifficulty::Expert) => (30, 16, 99),
+            GameDifficultyGrid::Standard(StandardGameDifficulty::Beginner) => {
+                GAME_BEGINNER_DIFFICULTY
+            }
+            GameDifficultyGrid::Standard(StandardGameDifficulty::Intermediate) => {
+                GAME_INTERMEDIATE_DIFFICULTY
+            }
+            GameDifficultyGrid::Standard(StandardGameDifficulty::Expert) => GAME_EXPERT_DIFFICULTY,
             GameDifficultyGrid::CustomRectangleOrSquareRandom(cfg) => cfg,
             GameDifficultyGrid::UnusualRandom((
                 width,
@@ -352,7 +359,7 @@ impl Grid {
             let random_cell = rng.gen_range(0..self.cells.all_count);
 
             let mine_point = GridCellPoint {
-                y: random_cell % self.size.height,
+                y: random_cell / self.size.width,
                 x: random_cell % self.size.width,
             };
 
