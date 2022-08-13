@@ -26,6 +26,8 @@ pub const NEW_GAME_STANDARD: Selector<StandardGameDifficulty> = Selector::new("N
 pub const NEW_GAME_CUSTOM_RECTANGLE_OR_SQUARE: Selector<DimensionBombsAmountSettingsTuple> =
     Selector::new("NEW_GAME_CUSTOM_RECTANGLE_OR_SQUARE");
 pub const OPEN_CUSTOM_GAME_WINDOW: Selector = Selector::new("OPEN_CUSTOM_GAME_WINDOW");
+pub const NEW_GAME_UNUSUAL_HEART: Selector = Selector::new("NEW_GAME_UNUSUAL_HEART");
+
 pub struct MainDelegate {
     pub app_window_id: WindowId,
     pub custom_game_window_id: Option<WindowId>,
@@ -123,6 +125,11 @@ impl AppDelegate<AppState> for MainDelegate {
             state.game = Game::new(GameDifficultyGrid::CustomRectangleOrSquareRandom(
                 options_tuple.clone(),
             ));
+            delegate_handled = Handled::Yes;
+        }
+
+        if cmd.is(NEW_GAME_UNUSUAL_HEART) {
+            state.game = Game::new(GameDifficultyGrid::get_heart());
             delegate_handled = Handled::Yes;
         }
 

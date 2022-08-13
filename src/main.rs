@@ -7,6 +7,7 @@ mod game;
 mod grid;
 mod menu;
 mod ui;
+mod unusual_predefined;
 
 use druid::{AppLauncher, PlatformError, Selector, Size, WindowDesc};
 
