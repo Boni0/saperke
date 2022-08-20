@@ -1,33 +1,47 @@
 use druid::{im::Vector, Data};
 use strum_macros::EnumIter;
 
-use crate::unusual_predefined::{HEART_EMPTY_POINTS, HEART_SIZE};
+use crate::variants::{
+    CIRCLE_EMPTY_POINTS, CIRCLE_SIZE, HEART_EMPTY_POINTS, HEART_SIZE, HEHE_EMPTY_POINTS, HEHE_SIZE,
+};
 
 use super::{GridCellPoint, GridSize, NonExistedPoints, SizeUnit};
 
 #[derive(Clone, Data, PartialEq, EnumIter)]
 pub enum GridUnusualVariant {
     Heart,
+    Hehe,
+    Circle,
 }
 
 impl GridUnusualVariant {
     pub fn get_variant_size(variant: &GridUnusualVariant) -> GridSize {
         match variant {
             GridUnusualVariant::Heart => HEART_SIZE,
+            GridUnusualVariant::Hehe => HEHE_SIZE,
+            GridUnusualVariant::Circle => CIRCLE_SIZE,
         }
     }
 
     pub fn get_variant_non_existed_points(variant: &GridUnusualVariant) -> NonExistedPoints {
-        GridUnusualVariant::convert_array_to_non_existed_points(
-            &(match variant {
-                GridUnusualVariant::Heart => HEART_EMPTY_POINTS,
-            }),
-        )
+        match variant {
+            GridUnusualVariant::Heart => {
+                GridUnusualVariant::convert_array_to_non_existed_points(&(HEART_EMPTY_POINTS))
+            }
+            GridUnusualVariant::Hehe => {
+                GridUnusualVariant::convert_array_to_non_existed_points(&(HEHE_EMPTY_POINTS))
+            }
+            GridUnusualVariant::Circle => {
+                GridUnusualVariant::convert_array_to_non_existed_points(&(CIRCLE_EMPTY_POINTS))
+            }
+        }
     }
 
     pub fn get_variant_label<'a>(variant: &'a GridUnusualVariant) -> &'a str {
         match variant {
             GridUnusualVariant::Heart => "Heart",
+            GridUnusualVariant::Hehe => ":-DDD",
+            GridUnusualVariant::Circle => "Circle",
         }
     }
 

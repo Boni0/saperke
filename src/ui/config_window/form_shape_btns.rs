@@ -58,8 +58,7 @@ impl ConfigWindowShapeBtns {
                     )]))
                     .fix_size(60.0, 25.0)
                     .on_click(move |_, data: &mut ConfigWindow, _| {
-                        if let GridStartShape::Unusual(_) = data.custom_start_shape {
-                        } else {
+                        if data.custom_start_shape != GridStartShape::Unusual(variant.clone()) {
                             data.custom_width = size.width.to_string();
                             data.custom_height = size.height.to_string();
                             data.custom_start_shape = GridStartShape::Unusual(variant.clone());
