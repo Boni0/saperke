@@ -1,17 +1,18 @@
 use druid::im::Vector;
 use druid::{Data, Lens};
 
-use super::GridSizeUnit;
+use super::SizeUnit;
 
 pub type GridCellValueUnit = u8;
 
 pub type GridCellMatrixRow = Vector<GridCell>;
 pub type GridCellMatrix = Vector<GridCellMatrixRow>;
+pub type NonExistedPoints = Vector<GridCellPoint>;
 
 #[derive(Clone, PartialEq, Data, Lens, PartialOrd, Eq, Ord)]
 pub struct GridCellPoint {
-    pub x: GridSizeUnit,
-    pub y: GridSizeUnit,
+    pub x: SizeUnit,
+    pub y: SizeUnit,
 }
 
 #[derive(PartialEq, Data, Clone)]
@@ -48,6 +49,14 @@ pub struct GridExistingCell {
     pub is_visible: bool,
 }
 
+impl GridExistingCell {
+    pub const INIT_EXISTING_CELL: GridExistingCell = GridExistingCell {
+        value: GridCellValue::Number(0),
+        state: GridCellState::Idle,
+        is_visible: false,
+    };
+}
+
 #[derive(PartialEq, Data, Clone)]
 pub enum GridCellVariant {
     NonExist,
@@ -63,18 +72,17 @@ pub struct GridCell {
 #[derive(Clone, PartialEq, Data, Lens)]
 pub struct GridCellsTagged {
     points: Vector<GridCellPoint>,
-    count: GridSizeUnit,
+    count: SizeUnit,
 }
 
 #[derive(Clone, PartialEq, Data, Lens)]
 pub struct GridCells {
     pub matrix: GridCellMatrix,
-    pub all_count: GridSizeUnit,
-    pub exist_count: GridSizeUnit,
-    pub visible_count: GridSizeUnit,
+    pub all_count: SizeUnit,
+    pub exist_count: SizeUnit,
+    pub visible_count: SizeUnit,
     pub tagged_points: Vector<GridCellPoint>,
     pub questioned_points: Vector<GridCellPoint>,
-    pub last_interacted_cell_state: Option<GridCellState>,
 }
 
 pub trait RemovePoint {

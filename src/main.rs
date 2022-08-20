@@ -1,7 +1,6 @@
 mod app;
 mod assets;
 mod consts;
-mod custom_rectangle_square;
 mod delegate;
 mod game;
 mod grid;
@@ -9,14 +8,13 @@ mod menu;
 mod ui;
 mod unusual_predefined;
 
-use druid::{AppLauncher, PlatformError, Selector, Size, WindowDesc};
+use druid::{AppLauncher, PlatformError, Size, WindowDesc};
 
 use app::AppState;
 use consts::TITLE;
 use delegate::MainDelegate;
-use game::{Game, GameDifficultyGrid, StandardGameDifficulty};
-
-pub const EMPTY: Selector<()> = Selector::new("EMPTY");
+use game::Game;
+use grid::{GridConfig, GridPredefinedBoxDifficulty};
 
 fn main() -> Result<(), PlatformError> {
     let window = WindowDesc::new(ui::main_window_build)
@@ -33,8 +31,8 @@ fn main() -> Result<(), PlatformError> {
         .menu(menu::create_app_menu());
 
     let state = AppState {
-        game: Game::new(GameDifficultyGrid::Standard(
-            StandardGameDifficulty::Beginner,
+        game: Game::new(GridConfig::predefined_box(
+            GridPredefinedBoxDifficulty::Beginner,
         )),
     };
 

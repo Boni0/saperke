@@ -1,7 +1,7 @@
 use druid::im::Vector;
 use druid::{Data, Lens};
 
-use super::{GridCellPoint, GridSizeUnit};
+use super::{GridCellPoint, SizeUnit};
 
 pub type BombsPoints = Vector<GridCellPoint>;
 
@@ -14,13 +14,13 @@ pub enum GridBombsPropagation {
 #[allow(dead_code)]
 #[derive(Clone, Data, PartialEq)]
 pub enum GridBombsConfig {
-    Randomized(GridSizeUnit),
+    Randomized(SizeUnit),
     Selected(BombsPoints),
 }
 
 #[derive(Clone, Data, Lens, PartialEq)]
 pub struct GridBombs {
     pub propagation: GridBombsPropagation,
-    pub count: GridSizeUnit,
+    pub count: SizeUnit,
     pub points: BombsPoints,
 }

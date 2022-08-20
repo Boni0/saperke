@@ -1,65 +1,47 @@
 mod bombs;
 mod cells;
-mod shape_size;
+mod config;
+mod shape;
+mod size;
 
 use rand::prelude::*;
 
 use druid::im::Vector;
 use druid::{Data, Lens};
 
-pub type GridSizeUnit = usize;
-
-pub use cells::{
-    GridCell, GridCellFlaggedState, GridCellMatrix, GridCellMatrixRow, GridCellOpenedState,
-    GridCellPoint, GridCellState, GridCellValue, GridCellValueUnit, GridCellVariant, GridCells,
-    GridExistingCell,
-};
-
-pub use shape_size::{GridShape, GridShapeSizeUnit, GridSize, NonExistedPoints};
+pub use self::config::*;
+pub use cells::*;
+pub use shape::*;
+pub use size::*;
 
 pub use bombs::{BombsPoints, GridBombs, GridBombsConfig, GridBombsPropagation};
-
-use crate::consts::{
-    GAME_BEGINNER_DIFFICULTY, GAME_EXPERT_DIFFICULTY, GAME_INTERMEDIATE_DIFFICULTY,
-};
-use crate::game::{GameDifficultyGrid, StandardGameDifficulty};
 
 #[derive(Clone, Data, Lens)]
 pub struct Grid {
     pub size: GridSize,
-    pub shape: GridShape,
+    pub start_shape: GridStartShape,
     pub cells: GridCells,
     pub bombs: GridBombs,
     pub is_active: bool,
 }
 
-const INIT_EXISTING_CELL: GridExistingCell = GridExistingCell {
-    value: GridCellValue::Number(0),
-    state: GridCellState::Idle,
-    is_visible: false,
-};
-
 impl Grid {
-    pub fn new(size: GridSize, shape: GridShape, bombs_config: &GridBombsConfig) -> Self {
-        let mut exist_count = size.height * size.width;
-        let mut non_existing_points_option = None;
-
-        match &shape {
-            GridShape::Unusual(non_existing_points) => {
-                exist_count -= non_existing_points.len();
-                non_existing_points_option = Some(non_existing_points);
-            }
-            _ => (),
-        };
+    pub fn new(config: GridConfig) -> Self {
+        let all_count = config.size.width * config.size.height;
+        let exist_count = all_count
+            - config
+                .non_existed_points
+                .clone()
+                .unwrap_or(Vector::new())
+                .len();
 
         let cells = GridCells {
-            matrix: Grid::create_cells_matrix(&size, non_existing_points_option),
-            all_count: size.height * size.width,
+            matrix: Grid::create_cells_matrix(&config.size, config.non_existed_points),
+            all_count,
             exist_count,
             visible_count: 0,
             tagged_points: Vector::new(),
             questioned_points: Vector::new(),
-            last_interacted_cell_state: None,
         };
 
         let get_eligible_bombs_count = |check_amount: usize| {
@@ -70,9 +52,9 @@ impl Grid {
             }
         };
 
-        let bombs = match bombs_config {
+        let bombs = match config.bombs_config {
             GridBombsConfig::Randomized(amount) => GridBombs {
-                count: get_eligible_bombs_count(*amount),
+                count: get_eligible_bombs_count(amount),
                 points: Vector::new(),
                 propagation: GridBombsPropagation::Randomized,
             },
@@ -95,8 +77,8 @@ impl Grid {
         };
 
         let mut grid = Self {
-            size,
-            shape,
+            size: config.size,
+            start_shape: config.start_shape,
             cells,
             bombs,
             is_active: false,
@@ -114,48 +96,12 @@ impl Grid {
                 }
 
                 grid.bombs.points = new_selected_points;
-                // TODO: Check if it's working correctly (IMO should return 0 for random)
                 grid.bombs.count
             }
         };
 
         grid.set_bombs_to_grid_randomly(random_mines_count);
-
         grid
-    }
-
-    pub fn from_difficulty(difficulty: GameDifficultyGrid) -> Self {
-        let mut non_existed_points: Option<NonExistedPoints> = None;
-
-        let (width, height, bombs_amount) = match difficulty {
-            GameDifficultyGrid::Standard(StandardGameDifficulty::Beginner) => {
-                GAME_BEGINNER_DIFFICULTY
-            }
-            GameDifficultyGrid::Standard(StandardGameDifficulty::Intermediate) => {
-                GAME_INTERMEDIATE_DIFFICULTY
-            }
-            GameDifficultyGrid::Standard(StandardGameDifficulty::Expert) => GAME_EXPERT_DIFFICULTY,
-            GameDifficultyGrid::CustomRectangleOrSquareRandom(cfg) => cfg,
-            GameDifficultyGrid::UnusualRandom((
-                width,
-                heigth,
-                non_existed_points_vec,
-                bombs_amount,
-            )) => {
-                non_existed_points = Some(non_existed_points_vec);
-                (width, heigth, bombs_amount)
-            }
-        };
-
-        let size = GridSize { width, height };
-        let bombs_config = GridBombsConfig::Randomized(bombs_amount);
-
-        let shape = match non_existed_points {
-            Some(non_existed_points_vec) => GridShape::Unusual(non_existed_points_vec),
-            None => GridShape::RectangleOrSquare,
-        };
-
-        Grid::new(size, shape, &bombs_config)
     }
 
     pub fn refresh(&mut self) {
@@ -167,10 +113,10 @@ impl Grid {
 
                 if let GridCellVariant::Exist(cell_data) = &cell.variant {
                     cell.variant = GridCellVariant::Exist(match self.bombs.propagation {
-                        GridBombsPropagation::Randomized => INIT_EXISTING_CELL,
+                        GridBombsPropagation::Randomized => GridExistingCell::INIT_EXISTING_CELL,
                         GridBombsPropagation::Selected => GridExistingCell {
                             value: cell_data.value,
-                            ..INIT_EXISTING_CELL
+                            ..GridExistingCell::INIT_EXISTING_CELL
                         },
                     });
                 }
@@ -270,7 +216,7 @@ impl Grid {
 
     fn create_cells_matrix(
         GridSize { height, width }: &GridSize,
-        non_existing_points: Option<&NonExistedPoints>,
+        non_existing_points: Option<NonExistedPoints>,
     ) -> GridCellMatrix {
         let mut cells: GridCellMatrix = Vector::new();
 
@@ -289,8 +235,8 @@ impl Grid {
                 let current_point = GridCellPoint { y, x };
 
                 shape_vec_height.push_back(GridCell {
-                    variant: if is_point_exist(&current_point) {
-                        GridCellVariant::Exist(INIT_EXISTING_CELL)
+                    variant: if is_point_exist.clone()(&current_point) {
+                        GridCellVariant::Exist(GridExistingCell::INIT_EXISTING_CELL)
                     } else {
                         GridCellVariant::NonExist
                     },

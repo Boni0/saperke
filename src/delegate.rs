@@ -5,10 +5,10 @@ use druid::{
 
 use crate::app::AppState;
 use crate::consts::{CUSTOM_GAME_SUBTITLE, TITLE};
-use crate::game::{
-    DimensionBombsAmountSettingsTuple, Game, GameDifficultyGrid, GameState, StandardGameDifficulty,
+use crate::game::{Game, GameState};
+use crate::grid::{
+    GridCellPoint, GridConfig, GridPredefinedBoxDifficulty, GridSize, GridUnusualVariant, SizeUnit,
 };
-use crate::grid::GridCellPoint;
 use crate::ui;
 
 pub const CELL_ACTIVE_BY_MULTIPLE_POINTS: Selector<Vec<GridCellPoint>> =
@@ -21,12 +21,16 @@ pub const CELL_TOGGLE_FLAG_BY_POINT: Selector<GridCellPoint> =
     Selector::new("CELL_TOGGLE_FLAG_BY_POINT");
 pub const CELL_OPEN_BY_POINT: Selector<GridCellPoint> = Selector::new("CELL_OPEN_BY_POINT");
 
-pub const RESTART_GAME: Selector = Selector::new("NEW_GAME");
-pub const NEW_GAME_STANDARD: Selector<StandardGameDifficulty> = Selector::new("NEW_GAME_STANDARD");
-pub const NEW_GAME_CUSTOM_RECTANGLE_OR_SQUARE: Selector<DimensionBombsAmountSettingsTuple> =
-    Selector::new("NEW_GAME_CUSTOM_RECTANGLE_OR_SQUARE");
+pub const RESTART_GAME: Selector = Selector::new("RESTART_GAME");
+
+pub const NEW_GAME_PREDEFINED_BOX: Selector<GridPredefinedBoxDifficulty> =
+    Selector::new("NEW_GAME_PREDEFINED_BOX");
+pub const NEW_GAME_SIMPLE_UNUSUAL: Selector<(GridUnusualVariant, SizeUnit)> =
+    Selector::new("NEW_GAME_SIMPLE_UNUSUAL");
+pub const NEW_GAME_SIMPLE_CUSTOM_BOX: Selector<(GridSize, SizeUnit)> =
+    Selector::new("NEW_GAME_SIMPLE_CUSTOM_BOX");
+
 pub const OPEN_CUSTOM_GAME_WINDOW: Selector = Selector::new("OPEN_CUSTOM_GAME_WINDOW");
-pub const NEW_GAME_UNUSUAL_HEART: Selector = Selector::new("NEW_GAME_UNUSUAL_HEART");
 
 pub struct MainDelegate {
     pub app_window_id: WindowId,
@@ -116,20 +120,18 @@ impl AppDelegate<AppState> for MainDelegate {
             delegate_handled = Handled::Yes;
         }
 
-        if let Some(standard_difficulty) = cmd.get(NEW_GAME_STANDARD) {
-            state.game = Game::new(GameDifficultyGrid::Standard(standard_difficulty.clone()));
+        if let Some(standard_difficulty) = cmd.get(NEW_GAME_PREDEFINED_BOX) {
+            state.game = Game::new(GridConfig::predefined_box(standard_difficulty.clone()));
             delegate_handled = Handled::Yes;
         }
 
-        if let Some(options_tuple) = cmd.get(NEW_GAME_CUSTOM_RECTANGLE_OR_SQUARE) {
-            state.game = Game::new(GameDifficultyGrid::CustomRectangleOrSquareRandom(
-                options_tuple.clone(),
-            ));
+        if let Some((variant, bombs_amount)) = cmd.get(NEW_GAME_SIMPLE_UNUSUAL) {
+            state.game = Game::new(GridConfig::simple_unusual(variant.clone(), *bombs_amount));
             delegate_handled = Handled::Yes;
         }
 
-        if cmd.is(NEW_GAME_UNUSUAL_HEART) {
-            state.game = Game::new(GameDifficultyGrid::get_heart());
+        if let Some((size, bombs_amount)) = cmd.get(NEW_GAME_SIMPLE_CUSTOM_BOX) {
+            state.game = Game::new(GridConfig::simple_custom_box(size.clone(), *bombs_amount));
             delegate_handled = Handled::Yes;
         }
 

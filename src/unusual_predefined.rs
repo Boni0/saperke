@@ -1,9 +1,11 @@
-use crate::grid::{GridShapeSizeUnit, GridSizeUnit};
+use crate::grid::{GridSize, SizeUnit};
 
-pub const HEART_SHAPE_WIDTH: GridShapeSizeUnit = 29;
-pub const HEART_SHAPE_HEIGHT: GridShapeSizeUnit = 24;
+pub const HEART_SIZE: GridSize = GridSize {
+    width: 29,
+    height: 24,
+};
 
-pub const HEART_EMPTY_POINTS: [(GridSizeUnit, GridSizeUnit); 265] = [
+pub const HEART_EMPTY_POINTS: [(SizeUnit, SizeUnit); 265] = [
     (0, 0),
     (0, 1),
     (0, 2),

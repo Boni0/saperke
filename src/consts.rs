@@ -1,6 +1,6 @@
 use std::time::Duration;
 
-use crate::game::DimensionBombsAmountSettingsTuple;
+use crate::grid::{GridSize, SizeUnit};
 
 pub const TITLE: &str = "Saperke";
 pub const CUSTOM_GAME_SUBTITLE: &str = "Custom Game";
@@ -40,10 +40,23 @@ pub const GAME_MIN_HEIGHT: usize = 9;
 pub const GAME_MAX_WIDTH: usize = 30;
 pub const GAME_MAX_HEIGHT: usize = 24;
 
-pub const GAME_BEGINNER_DIFFICULTY: DimensionBombsAmountSettingsTuple =
-    (GAME_MIN_WIDTH, GAME_MIN_HEIGHT, 10);
-pub const GAME_INTERMEDIATE_DIFFICULTY: DimensionBombsAmountSettingsTuple = (16, 16, 40);
-pub const GAME_EXPERT_DIFFICULTY: DimensionBombsAmountSettingsTuple = (30, 16, 99);
+pub const GAME_BEGINNER_DIFFICULTY_SIZE: GridSize = GridSize {
+    width: GAME_MIN_WIDTH,
+    height: GAME_MIN_HEIGHT,
+};
+pub const GAME_BEGINNER_DIFFICULTY_BOMBS_AMOUNT: SizeUnit = 10;
+
+pub const GAME_INTERMEDIATE_DIFFICULTY_SIZE: GridSize = GridSize {
+    width: 16,
+    height: 16,
+};
+pub const GAME_INTERMEDIATE_DIFFICULTY_BOMBS_AMOUNT: SizeUnit = 40;
+
+pub const GAME_EXPERT_DIFFICULTY_SIZE: GridSize = GridSize {
+    width: GAME_MAX_WIDTH,
+    height: 16,
+};
+pub const GAME_EXPERT_DIFFICULTY_BOMBS_AMOUNT: SizeUnit = 99;
 
 pub const CUSTOM_GAME_WIDTH_FROM_LABEL: &str = "Width";
 pub const CUSTOM_GAME_HEIGHT_FROM_LABEL: &str = "Height";

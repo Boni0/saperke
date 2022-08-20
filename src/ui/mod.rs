@@ -1,5 +1,5 @@
 mod border_box;
-mod custom_rectangle_square_form;
+mod config_window;
 mod final_time_status;
 mod game_container;
 mod grid;
@@ -9,20 +9,19 @@ mod timer_observer;
 mod window_size_observer;
 
 use crate::consts::{BACKGROUND_COLOR_HEX, FLEX_COMMON_SPACING_SIZE};
-use crate::custom_rectangle_square::CustomRectangleOrSquarFormState;
 use crate::game::Game;
 use crate::grid::Grid;
 use crate::AppState;
 use druid::widget::{Flex, LensWrap, Scope};
 use druid::{lens, Color, LensExt, Widget, WidgetExt};
 
+pub use config_window::ConfigWindow;
 pub use grid::GridWidget;
 pub use info_panel::InfoPanel;
 pub use three_column_counter::ThreeColumnCounter;
 pub use window_size_observer::WindowSizeObserverWidget;
 
 use self::border_box::{BorderBox, BorderColorPattern};
-use self::custom_rectangle_square_form::CustomRectangleOrSquareSubWindow;
 use self::game_container::GameContainerWidget;
 use final_time_status::FinalTimeStatus;
 use timer_observer::TimerObserver;
@@ -60,11 +59,11 @@ pub fn main_window_build() -> impl Widget<AppState> {
 pub fn custom_game_window_build() -> impl Widget<AppState> {
     BorderBox::new(
         Scope::from_lens(
-            CustomRectangleOrSquarFormState::new,
-            CustomRectangleOrSquarFormState::game,
-            CustomRectangleOrSquareSubWindow::new(),
+            ConfigWindow::create_state,
+            ConfigWindow::game_grid,
+            ConfigWindow::new(),
         )
-        .lens(AppState::game),
+        .lens(lens!(AppState, game).then(Game::grid)),
         BorderColorPattern::LigherFirst,
     )
     .background(Color::from_hex_str(BACKGROUND_COLOR_HEX).unwrap())
