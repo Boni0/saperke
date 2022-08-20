@@ -9,7 +9,7 @@ use crate::game::{Game, GameState};
 use crate::grid::{
     GridCellPoint, GridConfig, GridPredefinedBoxDifficulty, GridSize, GridUnusualVariant, SizeUnit,
 };
-use crate::ui;
+use crate::ui::{self, CONFIG_WINDOW_SIZE};
 
 pub const CELL_ACTIVE_BY_MULTIPLE_POINTS: Selector<Vec<GridCellPoint>> =
     Selector::new("CELL_ACTIVE_BY_MULTIPLE_POINTS");
@@ -147,11 +147,10 @@ impl AppDelegate<AppState> for MainDelegate {
                         width: 0.0,
                         height: 0.0,
                     })
-                    .window_size(Size {
-                        width: 350.0,
-                        height: 150.0,
-                    }),
-            )
+                    .window_size(CONFIG_WINDOW_SIZE),
+            );
+
+            delegate_handled = Handled::Yes;
         }
 
         delegate_handled

@@ -15,7 +15,7 @@ use crate::AppState;
 use druid::widget::{Flex, LensWrap, Scope};
 use druid::{lens, Color, LensExt, Widget, WidgetExt};
 
-pub use config_window::ConfigWindow;
+pub use config_window::{ConfigWindow, CONFIG_WINDOW_SIZE};
 pub use grid::GridWidget;
 pub use info_panel::InfoPanel;
 pub use three_column_counter::ThreeColumnCounter;

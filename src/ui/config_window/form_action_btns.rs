@@ -42,6 +42,10 @@ impl ConfigWindowActionBtns {
         .on_click(|ctx, config: &mut ConfigWindow, _| {
             let bombs_amount = config.custom_bombs_amount.parse::<usize>().unwrap_or(0);
 
+            if bombs_amount == 0 {
+                return;
+            }
+
             if let GridStartShape::Unusual(variant) = &config.custom_start_shape {
                 ctx.submit_command(NEW_GAME_SIMPLE_UNUSUAL.with((variant.clone(), bombs_amount)));
                 ctx.submit_command(CLOSE_WINDOW);
@@ -58,7 +62,7 @@ impl ConfigWindowActionBtns {
                     .unwrap_or(0)
                     .min(GAME_MAX_HEIGHT);
 
-                if width >= GAME_MIN_WIDTH && height >= GAME_MIN_HEIGHT && bombs_amount > 0 {
+                if width >= GAME_MIN_WIDTH && height >= GAME_MIN_HEIGHT {
                     ctx.submit_command(
                         NEW_GAME_SIMPLE_CUSTOM_BOX.with((GridSize { width, height }, bombs_amount)),
                     );

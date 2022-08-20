@@ -1,12 +1,20 @@
 mod form_action_btns;
 mod form_fields;
+mod form_shape_btns;
 
-use druid::{widget::Flex, Data, Lens, Widget, WidgetExt};
+use druid::{widget::Flex, Data, Lens, Size, Widget, WidgetExt};
 
 use crate::grid::{Grid, GridStartShape};
 
 use form_action_btns::ConfigWindowActionBtns;
 use form_fields::ConfigFormFields;
+
+use self::form_shape_btns::ConfigWindowShapeBtns;
+
+pub const CONFIG_WINDOW_SIZE: Size = Size {
+    width: 350.0,
+    height: 250.0,
+};
 
 #[derive(Clone, Data, Lens)]
 pub struct ConfigWindow {
@@ -33,10 +41,16 @@ impl ConfigWindow {
     }
 
     pub fn new() -> impl Widget<ConfigWindow> {
-        Flex::<ConfigWindow>::row()
+        let form = Flex::<ConfigWindow>::row()
             .with_child(ConfigFormFields::new())
-            .with_spacer(40.0)
+            .with_spacer(20.0)
             .with_child(ConfigWindowActionBtns::new())
+            .center();
+
+        Flex::<ConfigWindow>::column()
+            .with_child(ConfigWindowShapeBtns::new())
+            .with_spacer(20.0)
+            .with_child(form)
             .center()
     }
 }

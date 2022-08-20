@@ -1,13 +1,9 @@
-use druid::im::Vector;
 use druid::{Data, Lens};
 
-use crate::{
-    consts::{
-        GAME_BEGINNER_DIFFICULTY_BOMBS_AMOUNT, GAME_BEGINNER_DIFFICULTY_SIZE,
-        GAME_EXPERT_DIFFICULTY_BOMBS_AMOUNT, GAME_EXPERT_DIFFICULTY_SIZE,
-        GAME_INTERMEDIATE_DIFFICULTY_BOMBS_AMOUNT, GAME_INTERMEDIATE_DIFFICULTY_SIZE,
-    },
-    unusual_predefined::{HEART_EMPTY_POINTS, HEART_SIZE},
+use crate::consts::{
+    GAME_BEGINNER_DIFFICULTY_BOMBS_AMOUNT, GAME_BEGINNER_DIFFICULTY_SIZE,
+    GAME_EXPERT_DIFFICULTY_BOMBS_AMOUNT, GAME_EXPERT_DIFFICULTY_SIZE,
+    GAME_INTERMEDIATE_DIFFICULTY_BOMBS_AMOUNT, GAME_INTERMEDIATE_DIFFICULTY_SIZE,
 };
 
 use super::*;
@@ -69,12 +65,7 @@ impl GridConfig {
         bombs_config: GridBombsConfig,
         extra_non_existed_points: Option<NonExistedPoints>,
     ) -> Self {
-        let (size, mut non_existed_points) = match variant {
-            GridUnusualVariant::Heart => (
-                HEART_SIZE,
-                GridConfig::convert_array_to_non_existed_points(&HEART_EMPTY_POINTS),
-            ),
-        };
+        let (size, mut non_existed_points, _) = GridUnusualVariant::get_variant_data(&variant);
 
         if let Some(extra_points) = extra_non_existed_points {
             non_existed_points.append(extra_points);
@@ -90,15 +81,5 @@ impl GridConfig {
 
     pub fn simple_unusual(variant: GridUnusualVariant, bombs_amount: SizeUnit) -> Self {
         GridConfig::unusual(variant, GridBombsConfig::Randomized(bombs_amount), None)
-    }
-
-    fn convert_array_to_non_existed_points(start_arr: &[(SizeUnit, SizeUnit)]) -> NonExistedPoints {
-        let mut vec: NonExistedPoints = Vector::new();
-
-        for (y, x) in start_arr {
-            vec.push_back(GridCellPoint { x: *x, y: *y })
-        }
-
-        vec
     }
 }

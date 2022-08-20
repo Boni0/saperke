@@ -219,14 +219,7 @@ impl Grid {
         non_existing_points: Option<NonExistedPoints>,
     ) -> GridCellMatrix {
         let mut cells: GridCellMatrix = Vector::new();
-
-        let is_point_exist = |point: &GridCellPoint| {
-            if let Some(points_vec) = non_existing_points {
-                return !points_vec.contains(point);
-            }
-
-            true
-        };
+        let non_existing_points_vec = non_existing_points.unwrap_or(Vector::new());
 
         for y in 0..*height {
             let mut shape_vec_height: GridCellMatrixRow = Vector::new();
@@ -235,7 +228,7 @@ impl Grid {
                 let current_point = GridCellPoint { y, x };
 
                 shape_vec_height.push_back(GridCell {
-                    variant: if is_point_exist.clone()(&current_point) {
+                    variant: if !non_existing_points_vec.contains(&current_point) {
                         GridCellVariant::Exist(GridExistingCell::INIT_EXISTING_CELL)
                     } else {
                         GridCellVariant::NonExist
