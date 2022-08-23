@@ -1,6 +1,6 @@
 use druid::{
     widget::{Flex, Label, Painter, SizedBox},
-    Widget, WidgetExt,
+    Color, Widget, WidgetExt,
 };
 
 use crate::{
@@ -32,7 +32,7 @@ impl ConfigWindowShapeBtns {
         let mut main_row = Flex::row();
 
         main_row.add_child(
-            SizedBox::new(Label::new("Box").center())
+            SizedBox::new(Label::new("Box").with_text_color(Color::BLACK).center())
                 .background(make_btn_painter(vec![
                     GridStartShape::Box,
                     GridStartShape::PredefinedBox(GridPredefinedBoxDifficulty::Beginner),
@@ -52,18 +52,22 @@ impl ConfigWindowShapeBtns {
 
             main_row.add_default_spacer();
             main_row.add_child(
-                SizedBox::new(Label::new(GridUnusualVariant::get_variant_label(&variant)).center())
-                    .background(make_btn_painter(vec![GridStartShape::Unusual(
-                        variant.clone(),
-                    )]))
-                    .fix_size(60.0, 25.0)
-                    .on_click(move |_, data: &mut ConfigWindow, _| {
-                        if data.custom_start_shape != GridStartShape::Unusual(variant.clone()) {
-                            data.custom_width = size.width.to_string();
-                            data.custom_height = size.height.to_string();
-                            data.custom_start_shape = GridStartShape::Unusual(variant.clone());
-                        }
-                    }),
+                SizedBox::new(
+                    Label::new(GridUnusualVariant::get_variant_label(&variant))
+                        .with_text_color(Color::BLACK)
+                        .center(),
+                )
+                .background(make_btn_painter(vec![GridStartShape::Unusual(
+                    variant.clone(),
+                )]))
+                .fix_size(60.0, 25.0)
+                .on_click(move |_, data: &mut ConfigWindow, _| {
+                    if data.custom_start_shape != GridStartShape::Unusual(variant.clone()) {
+                        data.custom_width = size.width.to_string();
+                        data.custom_height = size.height.to_string();
+                        data.custom_start_shape = GridStartShape::Unusual(variant.clone());
+                    }
+                }),
             );
         }
 

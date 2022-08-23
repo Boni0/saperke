@@ -20,15 +20,13 @@ pub struct TimerObserver {
 }
 
 impl TimerObserver {
+    pub const INIT_TIME_DURATION: Duration = Duration::from_millis(0);
+
     pub fn new() -> Self {
         Self {
-            time_duration: Duration::from_millis(0),
+            time_duration: TimerObserver::INIT_TIME_DURATION,
             channel_sender: None,
         }
-    }
-
-    pub fn reset(&mut self) {
-        *self = TimerObserver::new();
     }
 
     pub fn send_game_state(&mut self, new_game_state: GameState) {
@@ -84,7 +82,10 @@ impl Widget<Game> for TimerObserver {
                             }
                         }
 
-                        self.reset();
+                        self.channel_sender = None;
+                        if game.state != GameState::Paused {
+                            self.time_duration = TimerObserver::INIT_TIME_DURATION;
+                        }
                     }
                 }
             }
@@ -92,7 +93,11 @@ impl Widget<Game> for TimerObserver {
         }
     }
 
-    fn update(&mut self, ctx: &mut UpdateCtx, _old_data: &Game, game: &Game, _env: &Env) {
+    fn update(&mut self, ctx: &mut UpdateCtx, old_game_data: &Game, game: &Game, _env: &Env) {
+        if old_game_data.state == GameState::Paused && game.state == GameState::NotStarted {
+            self.time_duration = TimerObserver::INIT_TIME_DURATION;
+        }
+
         if game.state == GameState::Running && self.channel_sender.is_none() {
             let (sender, receiver) = mpsc::channel::<GameState>();
 

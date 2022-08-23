@@ -25,6 +25,7 @@ pub const MENU_HEIGHT: f64 = 25.0;
 pub const MENU_GAME: &str = "Game";
 pub const MENU_GAME_NEW: &str = "New";
 pub const MENU_GAME_PAUSE: &str = "Pause";
+pub const GAME_PAUSED_INFO: &str = "Paused! Click to continue";
 
 pub const MENU_GAME_BEGINNER: &str = "Beginner";
 pub const MENU_GAME_INTERMEDIATE: &str = "Intermediate";

@@ -12,13 +12,6 @@ use controllers::GridController;
 pub struct GridWidget;
 
 impl GridWidget {
-    // pub fn new() -> impl Widget<Grid> {
-    //     BorderBox::new(
-    //         List::new(|| List::new(|| CellWidget::new()).horizontal())
-    //             .lens(lens!(Grid, cells).then(lens!(GridCells, matrix))),
-    //         BorderColorPattern::DarkerFirst,
-    //     )
-    // }
     pub fn new() -> impl Widget<Grid> {
         Container::new(
             List::new(|| List::new(|| CellWidget::new()).horizontal())

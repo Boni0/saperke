@@ -1,6 +1,9 @@
+use std::time::Duration;
+
 use druid::widget::Controller;
 use druid::{Env, Event, EventCtx, Widget};
 
+use crate::delegate::TOGGLE_PAUSE_GAME;
 use crate::game::{Game, GameState};
 
 pub struct GameContainerController;
@@ -16,22 +19,41 @@ where
         data: &mut Game,
         env: &Env,
     ) {
-        let hot = ctx.is_hot();
+        if data.state == GameState::Paused {
+            data.grid.is_active = false;
 
-        match event {
-            Event::MouseDown(mouse_event) | Event::MouseMove(mouse_event) => {
-                data.grid.is_active = if let GameState::EndState(_) = data.state {
-                    false
-                } else {
-                    hot && (mouse_event.buttons.has_left()
-                        && !mouse_event.buttons.has_middle()
-                        && !mouse_event.buttons.has_right())
-                        || (mouse_event.buttons.has_middle()
-                            || (mouse_event.buttons.has_left() && mouse_event.buttons.has_right())
-                            || (mouse_event.buttons.has_right() && mouse_event.buttons.has_left()))
-                };
+            match event {
+                Event::MouseUp(_) => {
+                    // Make small delay to not invoke grid opening cell logic controller
+                    ctx.request_timer(Duration::from_millis(10));
+                }
+                Event::Timer(_) => {
+                    ctx.submit_command(TOGGLE_PAUSE_GAME);
+                }
+                _ => (),
             }
-            _ => {}
+        } else {
+            match event {
+                Event::MouseDown(mouse_event)
+                | Event::MouseMove(mouse_event)
+                | Event::MouseUp(mouse_event) => {
+                    data.grid.is_active = match data.state {
+                        GameState::EndState(_) => false,
+                        _ => {
+                            ctx.is_hot()
+                                && (mouse_event.buttons.has_left()
+                                    && !mouse_event.buttons.has_middle()
+                                    && !mouse_event.buttons.has_right())
+                                || (mouse_event.buttons.has_middle()
+                                    || (mouse_event.buttons.has_left()
+                                        && mouse_event.buttons.has_right())
+                                    || (mouse_event.buttons.has_right()
+                                        && mouse_event.buttons.has_left()))
+                        }
+                    }
+                }
+                _ => {}
+            }
         }
 
         child.event(ctx, event, data, env)

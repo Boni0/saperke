@@ -9,6 +9,7 @@ use crate::game::{Game, GameState};
 use crate::grid::{
     GridCellPoint, GridConfig, GridPredefinedBoxDifficulty, GridSize, GridUnusualVariant, SizeUnit,
 };
+use crate::menu;
 use crate::ui::{self, CONFIG_WINDOW_SIZE};
 
 pub const CELL_ACTIVE_BY_MULTIPLE_POINTS: Selector<Vec<GridCellPoint>> =
@@ -22,6 +23,7 @@ pub const CELL_TOGGLE_FLAG_BY_POINT: Selector<GridCellPoint> =
 pub const CELL_OPEN_BY_POINT: Selector<GridCellPoint> = Selector::new("CELL_OPEN_BY_POINT");
 
 pub const RESTART_GAME: Selector = Selector::new("RESTART_GAME");
+pub const TOGGLE_PAUSE_GAME: Selector = Selector::new("TOGGLE_PAUSE_GAME");
 
 pub const NEW_GAME_PREDEFINED_BOX: Selector<GridPredefinedBoxDifficulty> =
     Selector::new("NEW_GAME_PREDEFINED_BOX");
@@ -120,6 +122,20 @@ impl AppDelegate<AppState> for MainDelegate {
             delegate_handled = Handled::Yes;
         }
 
+        if cmd.is(TOGGLE_PAUSE_GAME) {
+            match state.game.state {
+                GameState::Running => {
+                    state.game.state = GameState::Paused;
+                }
+                GameState::Paused => {
+                    state.game.state = GameState::Running;
+                }
+                _ => (),
+            }
+
+            delegate_handled = Handled::Yes;
+        }
+
         if let Some(standard_difficulty) = cmd.get(NEW_GAME_PREDEFINED_BOX) {
             state.game = Game::new(GridConfig::predefined_box(standard_difficulty.clone()));
             delegate_handled = Handled::Yes;
@@ -151,6 +167,10 @@ impl AppDelegate<AppState> for MainDelegate {
             );
 
             delegate_handled = Handled::Yes;
+        }
+
+        if delegate_handled == Handled::Yes {
+            ctx.set_menu(menu::create_app_menu(&state), self.app_window_id);
         }
 
         delegate_handled
