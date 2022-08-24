@@ -6,7 +6,6 @@ pub enum GameEndState {
     Win,
 }
 
-#[allow(dead_code)]
 #[derive(Clone, Data, PartialEq)]
 pub enum GameState {
     NotStarted,

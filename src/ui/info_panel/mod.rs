@@ -48,7 +48,7 @@ impl InfoPanelFlex {
         let mut face_btn = Flex::column();
         face_btn.add_child(
             SizedBox::empty()
-                .fix_size(25.5, 25.5)
+                .fix_size(21.0, 21.0)
                 .background(get_btn_icon_face_painter()),
         );
 
