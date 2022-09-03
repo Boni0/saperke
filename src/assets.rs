@@ -38,6 +38,7 @@ pub const TILE_UNOPENED_SVG_BG: &str = include_str!("../assets/tiles/unopened.sv
 pub const BOMB_SIGN_SVG_BG: &str = include_str!("../assets/signs/bomb.svg");
 pub const FLAG_SIGN_SVG_BG: &str = include_str!("../assets/signs/flag.svg");
 pub const QUESTION_MARK_SIGN_SVG_BG: &str = include_str!("../assets/signs/questionmark.svg");
+pub const X_SIGN_SVG_BG: &str = include_str!("../assets/signs/x.svg");
 
 pub const FACE_IDLE: &str = include_str!("../assets/face/idle.svg");
 pub const FACE_ACTIVE: &str = include_str!("../assets/face/active.svg");
