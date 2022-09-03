@@ -1,3 +1,4 @@
+mod about_window;
 mod border_box;
 mod config_window;
 mod final_time_status;
@@ -15,6 +16,7 @@ use crate::AppState;
 use druid::widget::{Flex, LensWrap, Scope};
 use druid::{lens, Color, LensExt, Widget, WidgetExt};
 
+pub use about_window::AboutWindow;
 pub use config_window::{ConfigWindow, CONFIG_WINDOW_SIZE};
 pub use grid::GridWidget;
 pub use info_panel::InfoPanel;
@@ -67,4 +69,9 @@ pub fn custom_game_window_build() -> impl Widget<AppState> {
         BorderColorPattern::LigherFirst,
     )
     .background(Color::from_hex_str(BACKGROUND_COLOR_HEX).unwrap())
+}
+
+pub fn about_window_build() -> impl Widget<AppState> {
+    BorderBox::new(AboutWindow::new(), BorderColorPattern::LigherFirst)
+        .background(Color::from_hex_str(BACKGROUND_COLOR_HEX).unwrap())
 }

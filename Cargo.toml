@@ -11,3 +11,4 @@ rand = "0.8.0"
 druid = { version = "0.7.0", features = ["svg", "im"] }
 strum = "0.24"
 strum_macros = "0.24"
+webbrowser = "0.7.1"

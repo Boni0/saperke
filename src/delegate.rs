@@ -4,7 +4,7 @@ use druid::{
 };
 
 use crate::app::AppState;
-use crate::consts::{CUSTOM_GAME_SUBTITLE, TITLE};
+use crate::consts::{ABOUT_TITLE, CUSTOM_GAME_SUBTITLE, TITLE};
 use crate::game::{Game, GameState};
 use crate::grid::{
     GridCellPoint, GridConfig, GridPredefinedBoxDifficulty, GridSize, GridUnusualVariant, SizeUnit,
@@ -33,6 +33,7 @@ pub const NEW_GAME_SIMPLE_CUSTOM_BOX: Selector<(GridSize, SizeUnit)> =
     Selector::new("NEW_GAME_SIMPLE_CUSTOM_BOX");
 
 pub const OPEN_CUSTOM_GAME_WINDOW: Selector = Selector::new("OPEN_CUSTOM_GAME_WINDOW");
+pub const OPEN_ABOUT_WINDOW: Selector = Selector::new("OPEN_ABOUT_WINDOW");
 
 pub struct MainDelegate {
     pub app_window_id: WindowId,
@@ -158,6 +159,24 @@ impl AppDelegate<AppState> for MainDelegate {
             ctx.new_window(
                 custom_game_window
                     .title(format!("{} - {}", TITLE, CUSTOM_GAME_SUBTITLE))
+                    .resizable(false)
+                    .with_min_size(Size {
+                        width: 0.0,
+                        height: 0.0,
+                    })
+                    .window_size(CONFIG_WINDOW_SIZE),
+            );
+
+            delegate_handled = Handled::Yes;
+        }
+
+        if cmd.is(OPEN_ABOUT_WINDOW) && self.about_window_id == None {
+            let about_window = WindowDesc::new(ui::about_window_build);
+            self.about_window_id = Some(about_window.id);
+
+            ctx.new_window(
+                about_window
+                    .title(format!("{} - {}", TITLE, ABOUT_TITLE))
                     .resizable(false)
                     .with_min_size(Size {
                         width: 0.0,

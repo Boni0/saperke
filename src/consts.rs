@@ -65,3 +65,10 @@ pub const CUSTOM_GAME_BOMBS_FROM_LABEL: &str = "Mines";
 
 pub const CUSTOM_GAME_CONFIRM_BTN_LABEL: &str = "Ok";
 pub const CUSTOM_GAME_CANCEL_BTN_LABEL: &str = "Cancel";
+
+pub const ABOUT_TITLE: &str = MENU_GAME_ABOUT;
+pub const ABOUT_DESC: &str = "A (poor) reimplementation of minesweeper in Rust";
+pub const ABOUT_MUA_INTRO: &str = "Programmed and bugged by";
+pub const ABOUT_MUA: &str = "Dawid Bonik";
+pub const ABOUT_BASEMENT_TITLE: &str = "Visit my basement";
+pub const ABOUT_BASEMENT_URL: &str = "https://github.com/Boni0";
