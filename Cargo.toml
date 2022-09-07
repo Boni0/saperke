@@ -12,3 +12,6 @@ druid = { git = "https://github.com/linebender/druid.git", rev = "0ebb799", feat
 strum = "0.24"
 strum_macros = "0.24"
 webbrowser = "0.7.1"
+
+[profile.dev.package.druid]
+opt-level = 3
