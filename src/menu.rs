@@ -1,4 +1,4 @@
-use druid::{commands::QUIT_APP, LocalizedString, MenuDesc, MenuItem, SysMods};
+use druid::{commands::QUIT_APP, Env, LocalizedString, Menu, MenuItem, SysMods, WindowId};
 
 use crate::{
     app::AppState,
@@ -14,73 +14,71 @@ use crate::{
     grid::{GridPredefinedBoxDifficulty, GridStartShape},
 };
 
-pub fn create_app_menu(app: &AppState) -> MenuDesc<AppState> {
-    let menu = MenuDesc::<AppState>::empty()
-        .append(
-            MenuDesc::new(LocalizedString::new(MENU_GAME))
-                .append(
-                    MenuItem::new(LocalizedString::new(MENU_GAME_NEW), RESTART_GAME)
+pub fn create_app_menu(_: Option<WindowId>, _: &AppState, _: &Env) -> Menu<AppState> {
+    let menu = Menu::<AppState>::empty()
+        .entry(
+            Menu::new(LocalizedString::new(MENU_GAME))
+                .entry(
+                    MenuItem::new(LocalizedString::new(MENU_GAME_NEW))
+                        .command(RESTART_GAME)
                         .hotkey(SysMods::Cmd, "r"),
                 )
-                .append(
-                    MenuItem::new(LocalizedString::new(MENU_GAME_PAUSE), TOGGLE_PAUSE_GAME)
+                .entry(
+                    MenuItem::new(LocalizedString::new(MENU_GAME_PAUSE))
+                        .command(TOGGLE_PAUSE_GAME)
                         .hotkey(SysMods::Cmd, "p")
-                        .disabled_if(|| {
-                            app.game.state != GameState::Paused
-                                && app.game.state != GameState::Running
+                        .enabled_if(|app: &AppState, _| {
+                            app.game.state == GameState::Paused
+                                || app.game.state == GameState::Running
                         }),
                 )
-                .append_separator()
-                .append(
-                    MenuItem::new(
-                        LocalizedString::new(MENU_GAME_BEGINNER),
-                        NEW_GAME_PREDEFINED_BOX.with(GridPredefinedBoxDifficulty::Beginner),
-                    )
-                    .selected_if(|| {
-                        app.game.grid.start_shape
-                            == GridStartShape::PredefinedBox(GridPredefinedBoxDifficulty::Beginner)
-                    })
-                    .hotkey(SysMods::Cmd, "1"),
+                .separator()
+                .entry(
+                    MenuItem::new(LocalizedString::new(MENU_GAME_BEGINNER))
+                        .command(
+                            NEW_GAME_PREDEFINED_BOX.with(GridPredefinedBoxDifficulty::Beginner),
+                        )
+                        .selected_if(|app: &AppState, _| {
+                            app.game.grid.start_shape
+                                == GridStartShape::PredefinedBox(
+                                    GridPredefinedBoxDifficulty::Beginner,
+                                )
+                        })
+                        .hotkey(SysMods::Cmd, "1"),
                 )
-                .append(
-                    MenuItem::new(
-                        LocalizedString::new(MENU_GAME_INTERMEDIATE),
-                        NEW_GAME_PREDEFINED_BOX.with(GridPredefinedBoxDifficulty::Intermediate),
-                    )
-                    .selected_if(|| {
-                        app.game.grid.start_shape
-                            == GridStartShape::PredefinedBox(
-                                GridPredefinedBoxDifficulty::Intermediate,
-                            )
-                    })
-                    .hotkey(SysMods::Cmd, "2"),
+                .entry(
+                    MenuItem::new(LocalizedString::new(MENU_GAME_INTERMEDIATE))
+                        .command(
+                            NEW_GAME_PREDEFINED_BOX.with(GridPredefinedBoxDifficulty::Intermediate),
+                        )
+                        .selected_if(|app: &AppState, _| {
+                            app.game.grid.start_shape
+                                == GridStartShape::PredefinedBox(
+                                    GridPredefinedBoxDifficulty::Intermediate,
+                                )
+                        })
+                        .hotkey(SysMods::Cmd, "2"),
                 )
-                .append(
-                    MenuItem::new(
-                        LocalizedString::new(MENU_GAME_EXPERT),
-                        NEW_GAME_PREDEFINED_BOX.with(GridPredefinedBoxDifficulty::Expert),
-                    )
-                    .selected_if(|| {
-                        app.game.grid.start_shape
-                            == GridStartShape::PredefinedBox(GridPredefinedBoxDifficulty::Expert)
-                    })
-                    .hotkey(SysMods::Cmd, "3"),
+                .entry(
+                    MenuItem::new(LocalizedString::new(MENU_GAME_EXPERT))
+                        .command(NEW_GAME_PREDEFINED_BOX.with(GridPredefinedBoxDifficulty::Expert))
+                        .selected_if(|app: &AppState, _| {
+                            app.game.grid.start_shape
+                                == GridStartShape::PredefinedBox(
+                                    GridPredefinedBoxDifficulty::Expert,
+                                )
+                        })
+                        .hotkey(SysMods::Cmd, "3"),
                 )
-                .append_separator()
-                .append(MenuItem::new(
-                    LocalizedString::new(MENU_GAME_CUSTOM),
-                    OPEN_CUSTOM_GAME_WINDOW,
-                ))
-                .append_separator()
-                .append(MenuItem::new(
-                    LocalizedString::new(MENU_GAME_EXIT),
-                    QUIT_APP,
-                )),
+                .separator()
+                .entry(
+                    MenuItem::new(LocalizedString::new(MENU_GAME_CUSTOM))
+                        .command(OPEN_CUSTOM_GAME_WINDOW),
+                )
+                .separator()
+                .entry(MenuItem::new(LocalizedString::new(MENU_GAME_EXIT)).command(QUIT_APP)),
         )
-        .append(MenuItem::new(
-            LocalizedString::new(MENU_GAME_ABOUT),
-            OPEN_ABOUT_WINDOW,
-        ));
+        .entry(MenuItem::new(LocalizedString::new(MENU_GAME_ABOUT)).command(OPEN_ABOUT_WINDOW));
 
     menu
 }

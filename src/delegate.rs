@@ -9,7 +9,6 @@ use crate::game::{Game, GameState};
 use crate::grid::{
     GridCellPoint, GridConfig, GridPredefinedBoxDifficulty, GridSize, GridUnusualVariant, SizeUnit,
 };
-use crate::menu;
 use crate::ui::{self, CONFIG_WINDOW_SIZE};
 
 pub const CELL_ACTIVE_BY_MULTIPLE_POINTS: Selector<Vec<GridCellPoint>> =
@@ -153,7 +152,7 @@ impl AppDelegate<AppState> for MainDelegate {
         }
 
         if cmd.is(OPEN_CUSTOM_GAME_WINDOW) && self.custom_game_window_id == None {
-            let custom_game_window = WindowDesc::new(ui::custom_game_window_build);
+            let custom_game_window = WindowDesc::new(ui::custom_game_window_build());
             self.custom_game_window_id = Some(custom_game_window.id);
 
             ctx.new_window(
@@ -171,7 +170,7 @@ impl AppDelegate<AppState> for MainDelegate {
         }
 
         if cmd.is(OPEN_ABOUT_WINDOW) && self.about_window_id == None {
-            let about_window = WindowDesc::new(ui::about_window_build);
+            let about_window = WindowDesc::new(ui::about_window_build());
             self.about_window_id = Some(about_window.id);
 
             ctx.new_window(
@@ -186,10 +185,6 @@ impl AppDelegate<AppState> for MainDelegate {
             );
 
             delegate_handled = Handled::Yes;
-        }
-
-        if delegate_handled == Handled::Yes {
-            ctx.set_menu(menu::create_app_menu(&state), self.app_window_id);
         }
 
         delegate_handled

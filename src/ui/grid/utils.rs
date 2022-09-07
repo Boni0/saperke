@@ -1,93 +1,59 @@
-use druid::widget::{Painter, Svg, SvgData};
-use druid::{Color, RenderContext, Widget, WidgetExt};
+use druid::widget::SvgData;
 use std::str::FromStr;
 
 use crate::assets::{
     BOMB_SIGN_SVG_BG, FLAG_SIGN_SVG_BG, NUMS_SVG_BG_ARRAY, QUESTION_MARK_SIGN_SVG_BG,
     TILE_OPENED_SVG_BG, TILE_UNOPENED_SVG_BG, X_SIGN_SVG_BG,
 };
-use crate::consts::{GRID_CELL_HEIGHT, GRID_CELL_WIDTH};
-use crate::grid::{
-    GridCell, GridCellFlaggedState, GridCellOpenedState, GridCellState, GridCellValue,
-    GridCellVariant,
-};
 
-pub fn create_cell_svg() -> impl Widget<GridCell> {
-    Svg::new(SvgData::empty()).fix_size(GRID_CELL_WIDTH, GRID_CELL_HEIGHT)
+#[derive(Clone)]
+pub struct PainterSvgData {
+    pub tile_unopened: SvgData,
+    pub tile_opened: SvgData,
+    pub question_mark: SvgData,
+    pub flag_sign: SvgData,
+    pub nums: [SvgData; 9],
+    pub bomb: SvgData,
+    pub x_sign: SvgData,
 }
 
-enum PaintInside<'a> {
-    Bg(&'a Color),
-    Svg(&'a str),
-}
+pub fn init_cell_painter() -> PainterSvgData {
+    let svg_data = |str: &str| -> SvgData {
+        if let Ok(svg_data) = SvgData::from_str(str) {
+            svg_data
+        } else {
+            SvgData::empty()
+        }
+    };
 
-pub fn get_cell_painter() -> Painter<GridCell> {
-    Painter::new(move |ctx, cell: &GridCell, env| {
-        let bounds = ctx.size().to_rect();
+    let tile_unopened = svg_data(TILE_UNOPENED_SVG_BG);
+    let tile_opened = svg_data(TILE_OPENED_SVG_BG);
 
-        let mut paint = |inside: PaintInside| match inside {
-            PaintInside::Bg(color) => ctx.fill(bounds, color),
-            PaintInside::Svg(from_str) => {
-                if let Ok(svg_data) = SvgData::from_str(from_str) {
-                    Svg::new(svg_data).paint(ctx, cell, env);
-                }
-            }
-        };
+    let question_mark = svg_data(QUESTION_MARK_SIGN_SVG_BG);
+    let flag_sign = svg_data(FLAG_SIGN_SVG_BG);
 
-        if let GridCellVariant::Exist(cell_data) = &cell.variant {
-            match cell_data.state {
-                GridCellState::Idle => {
-                    paint(PaintInside::Svg(TILE_UNOPENED_SVG_BG));
-                }
-                GridCellState::Active => {
-                    paint(PaintInside::Svg(TILE_OPENED_SVG_BG));
-                }
-                GridCellState::Flagged(GridCellFlaggedState::Questioned) => {
-                    paint(PaintInside::Svg(TILE_UNOPENED_SVG_BG));
-                    paint(PaintInside::Svg(QUESTION_MARK_SIGN_SVG_BG));
-                }
-                GridCellState::Flagged(GridCellFlaggedState::Tagged) => {
-                    paint(PaintInside::Svg(TILE_UNOPENED_SVG_BG));
-                    paint(PaintInside::Svg(FLAG_SIGN_SVG_BG));
-                }
-                GridCellState::Opened(GridCellOpenedState::NoAction) => {
-                    paint(PaintInside::Svg(TILE_OPENED_SVG_BG));
-                    if let GridCellValue::Number(value) = cell_data.value {
-                        paint(PaintInside::Svg(NUMS_SVG_BG_ARRAY[value as usize]));
-                    }
-                }
-                GridCellState::Opened(GridCellOpenedState::CausedLoss) => {
-                    paint(PaintInside::Svg(TILE_OPENED_SVG_BG));
-                    paint(PaintInside::Bg(&Color::RED));
-                    paint(PaintInside::Svg(BOMB_SIGN_SVG_BG));
-                }
-                GridCellState::ToVerifyFlag(GridCellFlaggedState::Questioned) => {
-                    match cell_data.value {
-                        GridCellValue::Number(_) => {
-                            paint(PaintInside::Svg(TILE_UNOPENED_SVG_BG));
-                            paint(PaintInside::Svg(QUESTION_MARK_SIGN_SVG_BG));
-                        }
-                        GridCellValue::Bomb => {
-                            paint(PaintInside::Svg(TILE_OPENED_SVG_BG));
-                            paint(PaintInside::Svg(BOMB_SIGN_SVG_BG));
-                        }
-                    }
-                }
-                GridCellState::ToVerifyFlag(GridCellFlaggedState::Tagged) => {
-                    match cell_data.value {
-                        GridCellValue::Number(_) => {
-                            paint(PaintInside::Svg(TILE_OPENED_SVG_BG));
-                            paint(PaintInside::Svg(BOMB_SIGN_SVG_BG));
-                            paint(PaintInside::Svg(X_SIGN_SVG_BG));
-                        }
-                        GridCellValue::Bomb => {
-                            paint(PaintInside::Svg(TILE_UNOPENED_SVG_BG));
-                            paint(PaintInside::Bg(&Color::GREEN));
-                            paint(PaintInside::Svg(FLAG_SIGN_SVG_BG));
-                        }
-                    }
-                }
-            }
-        };
-    })
+    let nums = [
+        svg_data(NUMS_SVG_BG_ARRAY[0]),
+        svg_data(NUMS_SVG_BG_ARRAY[1]),
+        svg_data(NUMS_SVG_BG_ARRAY[2]),
+        svg_data(NUMS_SVG_BG_ARRAY[3]),
+        svg_data(NUMS_SVG_BG_ARRAY[4]),
+        svg_data(NUMS_SVG_BG_ARRAY[5]),
+        svg_data(NUMS_SVG_BG_ARRAY[6]),
+        svg_data(NUMS_SVG_BG_ARRAY[7]),
+        svg_data(NUMS_SVG_BG_ARRAY[8]),
+    ];
+
+    let bomb = svg_data(BOMB_SIGN_SVG_BG);
+    let x_sign = svg_data(X_SIGN_SVG_BG);
+
+    PainterSvgData {
+        tile_unopened,
+        tile_opened,
+        question_mark,
+        flag_sign,
+        nums,
+        bomb,
+        x_sign,
+    }
 }
