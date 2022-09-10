@@ -2,7 +2,7 @@ use std::convert::TryInto;
 use std::str::FromStr;
 
 use druid::{Widget, WidgetExt, Color, RenderContext};
-use druid::widget::{Painter, Svg, SvgData};
+use druid::widget::{Painter, Svg, SvgData, SizedBox};
 
 use crate::assets::{
     COUNTER_MINUS_SVG_BG,
@@ -20,40 +20,75 @@ pub enum CounterColumn {
     Third 
 }
 
-fn get_column_number_svg_str<'a>(num: i64) -> &'a str {
-    let idx: usize = num.abs().try_into().unwrap();
-    COUNTER_NUMS_SVG_BG_ARRAY[idx]
+impl CounterColumn {
+    pub fn new(column: CounterColumn, painter: &CounterColumnPainter) -> impl Widget<i64> {
+        SizedBox::empty()
+            .fix_size(TIMER_COLUMN_WIDTH, TIMER_COLUMN_HEIGHT)
+            .background(painter.get(column))
+    }
 }
 
-fn get_column_painter(column: CounterColumn) -> Painter<i64> {
-    Painter::new(move |ctx, count: &i64, env| {
-        let bounds = ctx.size().to_rect();
-        ctx.fill(bounds, &Color::BLACK);
+pub struct CounterColumnPainter {
+    minus_svg: SvgData,
+    nums_svg: [SvgData; 10]
+}
 
-        let svg_str: &str = match column {
-            CounterColumn::First => {
-                if *count < 0 {
-                    COUNTER_MINUS_SVG_BG
-                } else {
-                    get_column_number_svg_str((*count % 1000) / 100)
-                }
-            },
-            CounterColumn::Second => {
-                get_column_number_svg_str((*count % 100) / 10)
-            },
-            CounterColumn::Third => {
-                get_column_number_svg_str(*count % 10)
-            },
+impl CounterColumnPainter {
+    pub fn create() -> Self {
+        let svg_data = |str: &str| -> SvgData {
+            if let Ok(svg_data) = SvgData::from_str(str) {
+                svg_data
+            } else {
+                SvgData::empty()
+            }
         };
 
-        if let Ok(svg_data) = SvgData::from_str(svg_str) {
-            Svg::new(svg_data).paint(ctx, count, env)
+        Self {
+            minus_svg: svg_data(COUNTER_MINUS_SVG_BG),
+            nums_svg: [
+                svg_data(COUNTER_NUMS_SVG_BG_ARRAY[0]),
+                svg_data(COUNTER_NUMS_SVG_BG_ARRAY[1]),
+                svg_data(COUNTER_NUMS_SVG_BG_ARRAY[2]),
+                svg_data(COUNTER_NUMS_SVG_BG_ARRAY[3]),
+                svg_data(COUNTER_NUMS_SVG_BG_ARRAY[4]),
+                svg_data(COUNTER_NUMS_SVG_BG_ARRAY[5]),
+                svg_data(COUNTER_NUMS_SVG_BG_ARRAY[6]),
+                svg_data(COUNTER_NUMS_SVG_BG_ARRAY[7]),
+                svg_data(COUNTER_NUMS_SVG_BG_ARRAY[8]),
+                svg_data(COUNTER_NUMS_SVG_BG_ARRAY[9]),
+            ]
         }
-    })
-}
+    }
 
-pub fn get_column_svg(column: CounterColumn) -> impl Widget<i64> {
-    Svg::new(SvgData::empty())
-        .background(get_column_painter(column))
-        .fix_size(TIMER_COLUMN_WIDTH, TIMER_COLUMN_HEIGHT)
+    pub fn get(&self, column: CounterColumn) -> Painter<i64> {
+        let minus_svg = self.minus_svg.clone();
+        let nums_svg = self.nums_svg.clone();
+
+        let convert_into_usize = |num: i64| -> usize {
+            num.abs().try_into().unwrap()
+        };
+
+        Painter::new(move |ctx, count: &i64, env| {
+            let bounds = ctx.size().to_rect();
+            ctx.fill(bounds, &Color::BLACK);
+
+            let svg_data = match column {
+                CounterColumn::First => {
+                    if *count < 0 {
+                        &minus_svg
+                    } else {
+                        &nums_svg[convert_into_usize((*count % 1000) / 100)]
+                    }
+                },
+                CounterColumn::Second => {
+                    &nums_svg[convert_into_usize((*count % 100) / 10)]
+                },
+                CounterColumn::Third => {
+                    &nums_svg[convert_into_usize(*count % 10)]
+                },
+            };
+    
+            Svg::new(svg_data.clone()).paint(ctx, count, env);
+        })
+    }
 }

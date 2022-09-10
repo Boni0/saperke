@@ -15,7 +15,7 @@ use crate::{
 };
 
 pub fn create_app_menu(_: Option<WindowId>, _: &AppState, _: &Env) -> Menu<AppState> {
-    let menu = Menu::<AppState>::empty()
+    let menu = Menu::empty()
         .entry(
             Menu::new(LocalizedString::new(MENU_GAME))
                 .entry(
@@ -73,12 +73,13 @@ pub fn create_app_menu(_: Option<WindowId>, _: &AppState, _: &Env) -> Menu<AppSt
                 .separator()
                 .entry(
                     MenuItem::new(LocalizedString::new(MENU_GAME_CUSTOM))
-                        .command(OPEN_CUSTOM_GAME_WINDOW),
+                        .command(OPEN_CUSTOM_GAME_WINDOW)
+                        .hotkey(SysMods::Cmd, "4"),
                 )
                 .separator()
-                .entry(MenuItem::new(LocalizedString::new(MENU_GAME_EXIT)).command(QUIT_APP)),
-        )
-        .entry(MenuItem::new(LocalizedString::new(MENU_GAME_ABOUT)).command(OPEN_ABOUT_WINDOW));
-
+                .entry(MenuItem::new(LocalizedString::new(MENU_GAME_ABOUT)).command(OPEN_ABOUT_WINDOW))
+                .entry(MenuItem::new(LocalizedString::new(MENU_GAME_EXIT)).command(QUIT_APP).hotkey(SysMods::Cmd, "q"))
+        );
+        
     menu
 }

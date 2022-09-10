@@ -1,6 +1,6 @@
 use druid::{
     BoxConstraints, Env, Event, EventCtx, LayoutCtx, LifeCycle, LifeCycleCtx, Size, UpdateCtx,
-    Widget, WindowHandle,
+    Widget,
 };
 
 use crate::{
@@ -20,8 +20,8 @@ const VERTICAL_EXTRA_SIZES: f64 = TIMER_COLUMN_HEIGHT + FLEX_COMMON_SPACING_SIZE
 
 pub struct WindowSizeObserverWidget;
 impl WindowSizeObserverWidget {
-    fn set_window_size(&self, window_handle: &WindowHandle, size: &GridSize) {
-        window_handle.set_size(Size {
+    pub fn get_window_size(size: &GridSize) -> Size {
+        Size {
             width: (GRID_CELL_WIDTH * (size.width as f64))
                 + HORIZONTAL_SPACING
                 + HORIZONTAL_BORDERS,
@@ -30,7 +30,7 @@ impl WindowSizeObserverWidget {
                 + VERTICAL_SPACING
                 + VERTICAL_BORDERS
                 + VERTICAL_EXTRA_SIZES,
-        })
+        }
     }
 }
 
@@ -38,7 +38,7 @@ impl Widget<GridSize> for WindowSizeObserverWidget {
     fn event(&mut self, _ctx: &mut EventCtx, _event: &Event, _data: &mut GridSize, _env: &Env) {}
 
     fn update(&mut self, ctx: &mut UpdateCtx, _old_data: &GridSize, data: &GridSize, _env: &Env) {
-        self.set_window_size(ctx.window(), data);
+        ctx.window().set_size(WindowSizeObserverWidget::get_window_size(data));
     }
 
     fn lifecycle(
@@ -49,7 +49,7 @@ impl Widget<GridSize> for WindowSizeObserverWidget {
         _env: &Env,
     ) {
         if let LifeCycle::WidgetAdded = event {
-            self.set_window_size(ctx.window(), data);
+            ctx.window().set_size(WindowSizeObserverWidget::get_window_size(data));
         }
     }
 

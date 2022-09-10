@@ -11,10 +11,11 @@ mod variants;
 use druid::{AppLauncher, PlatformError, Size, WindowDesc};
 
 use app::AppState;
-use consts::TITLE;
+use consts::{TITLE, GAME_BEGINNER_DIFFICULTY_SIZE};
 use delegate::MainDelegate;
 use game::Game;
 use grid::{GridConfig, GridPredefinedBoxDifficulty};
+use ui::WindowSizeObserverWidget;
 
 fn main() -> Result<(), PlatformError> {
     let state = AppState {
@@ -30,10 +31,7 @@ fn main() -> Result<(), PlatformError> {
             width: 10.0,
             height: 10.0,
         })
-        .with_min_size(Size {
-            width: 10.0,
-            height: 10.0,
-        })
+        .with_min_size(WindowSizeObserverWidget::get_window_size(&GAME_BEGINNER_DIFFICULTY_SIZE))
         .menu(menu::create_app_menu);
 
     let app_window_id = window.id;

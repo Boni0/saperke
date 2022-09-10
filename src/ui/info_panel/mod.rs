@@ -10,7 +10,7 @@ use crate::consts::{BORDER_SIZE, FLEX_COMMON_SPACING_SIZE, GRID_CELL_WIDTH, TIME
 use crate::game::Game;
 use crate::ui::ThreeColumnCounter;
 
-use self::utils::{get_btn_icon_face_painter, get_btn_painter};
+use self::utils::{FaceButtonPainter};
 
 use super::border_box::{BorderBox, BorderColorPattern};
 
@@ -28,6 +28,7 @@ pub struct InfoPanelFlex {
 impl InfoPanelFlex {
     pub fn new() -> Self {
         let mut flex = Flex::row();
+        let painter = FaceButtonPainter::create();
 
         flex.add_child(ThreeColumnCounter::new().lens(lens::Identity.map(
             |state: &AppState| {
@@ -49,14 +50,14 @@ impl InfoPanelFlex {
         face_btn.add_child(
             SizedBox::empty()
                 .fix_size(21.0, 21.0)
-                .background(get_btn_icon_face_painter()),
+                .background(painter.get_face())
         );
 
         flex.add_child(
             face_btn
                 .center()
                 .fix_size(TIMER_COLUMN_HEIGHT, TIMER_COLUMN_HEIGHT)
-                .background(get_btn_painter())
+                .background(painter.get_btn())
                 .on_click(|_, game: &mut Game, _| game.restart())
                 .lens(lens!(AppState, game)),
         );
