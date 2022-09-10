@@ -1,3 +1,5 @@
+use std::env;
+
 use druid::{
     BoxConstraints, Env, Event, EventCtx, LayoutCtx, LifeCycle, LifeCycleCtx, Size, UpdateCtx,
     Widget,
@@ -17,19 +19,28 @@ const HORIZONTAL_BORDERS: f64 = BORDER_SIZE * 4.0;
 const VERTICAL_SPACING: f64 = FLEX_COMMON_SPACING_SIZE * 4.0;
 const VERTICAL_BORDERS: f64 = BORDER_SIZE * 6.0;
 const VERTICAL_EXTRA_SIZES: f64 = TIMER_COLUMN_HEIGHT + FLEX_COMMON_SPACING_SIZE;
+const WINDOWS_OS_EXTRA_SIZE: f64 = 32.0;
 
 pub struct WindowSizeObserverWidget;
 impl WindowSizeObserverWidget {
     pub fn get_window_size(size: &GridSize) -> Size {
+        let windows_os_related_size = if env::consts::OS == "windows" {
+            WINDOWS_OS_EXTRA_SIZE
+        } else {
+            0.0
+        };
+
         Size {
             width: (GRID_CELL_WIDTH * (size.width as f64))
                 + HORIZONTAL_SPACING
-                + HORIZONTAL_BORDERS,
+                + HORIZONTAL_BORDERS
+                + windows_os_related_size,
             height: (GRID_CELL_HEIGHT * (size.height as f64))
                 + MENU_HEIGHT
                 + VERTICAL_SPACING
                 + VERTICAL_BORDERS
-                + VERTICAL_EXTRA_SIZES,
+                + VERTICAL_EXTRA_SIZES
+                + windows_os_related_size,
         }
     }
 }
