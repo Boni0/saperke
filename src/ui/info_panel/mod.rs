@@ -10,7 +10,7 @@ use crate::consts::{BORDER_SIZE, FLEX_COMMON_SPACING_SIZE, GRID_CELL_WIDTH, TIME
 use crate::game::Game;
 use crate::ui::ThreeColumnCounter;
 
-use self::utils::{FaceButtonPainter};
+use self::utils::FaceButtonPainter;
 
 use super::border_box::{BorderBox, BorderColorPattern};
 
@@ -50,7 +50,7 @@ impl InfoPanelFlex {
         face_btn.add_child(
             SizedBox::empty()
                 .fix_size(21.0, 21.0)
-                .background(painter.get_face())
+                .background(painter.get_face()),
         );
 
         flex.add_child(

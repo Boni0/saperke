@@ -26,13 +26,13 @@ impl FaceButtonPainter {
             }
         };
 
-        Self { 
-            tile_opened: svg_data(TILE_OPENED_SVG_BG), 
-            tile_unopened: svg_data(TILE_UNOPENED_SVG_BG), 
-            face_win: svg_data(FACE_WIN), 
-            face_loss: svg_data(FACE_LOSS), 
-            face_active: svg_data(FACE_ACTIVE), 
-            face_idle: svg_data(FACE_IDLE), 
+        Self {
+            tile_opened: svg_data(TILE_OPENED_SVG_BG),
+            tile_unopened: svg_data(TILE_UNOPENED_SVG_BG),
+            face_win: svg_data(FACE_WIN),
+            face_loss: svg_data(FACE_LOSS),
+            face_active: svg_data(FACE_ACTIVE),
+            face_idle: svg_data(FACE_IDLE),
         }
     }
 
@@ -52,10 +52,10 @@ impl FaceButtonPainter {
     }
 
     pub fn get_face(&self) -> Painter<Game> {
-        let face_win = self.face_win.clone(); 
+        let face_win = self.face_win.clone();
         let face_loss = self.face_loss.clone();
-        let face_active = self.face_active.clone(); 
-        let face_idle = self.face_idle.clone(); 
+        let face_active = self.face_active.clone();
+        let face_idle = self.face_idle.clone();
 
         Painter::new(move |ctx, game: &Game, env| {
             let face_svg = match game.state {

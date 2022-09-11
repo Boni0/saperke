@@ -1,23 +1,17 @@
 use std::convert::TryInto;
 use std::str::FromStr;
 
-use druid::{Widget, WidgetExt, Color, RenderContext};
-use druid::widget::{Painter, Svg, SvgData, SizedBox};
+use druid::widget::{Painter, SizedBox, Svg, SvgData};
+use druid::{Color, RenderContext, Widget, WidgetExt};
 
-use crate::assets::{
-    COUNTER_MINUS_SVG_BG,
-    COUNTER_NUMS_SVG_BG_ARRAY
-};
+use crate::assets::{COUNTER_MINUS_SVG_BG, COUNTER_NUMS_SVG_BG_ARRAY};
 
-use crate::consts::{
-    TIMER_COLUMN_WIDTH,
-    TIMER_COLUMN_HEIGHT
-};
+use crate::consts::{TIMER_COLUMN_HEIGHT, TIMER_COLUMN_WIDTH};
 
 pub enum CounterColumn {
     First,
     Second,
-    Third 
+    Third,
 }
 
 impl CounterColumn {
@@ -30,7 +24,7 @@ impl CounterColumn {
 
 pub struct CounterColumnPainter {
     minus_svg: SvgData,
-    nums_svg: [SvgData; 10]
+    nums_svg: [SvgData; 10],
 }
 
 impl CounterColumnPainter {
@@ -56,7 +50,7 @@ impl CounterColumnPainter {
                 svg_data(COUNTER_NUMS_SVG_BG_ARRAY[7]),
                 svg_data(COUNTER_NUMS_SVG_BG_ARRAY[8]),
                 svg_data(COUNTER_NUMS_SVG_BG_ARRAY[9]),
-            ]
+            ],
         }
     }
 
@@ -64,9 +58,7 @@ impl CounterColumnPainter {
         let minus_svg = self.minus_svg.clone();
         let nums_svg = self.nums_svg.clone();
 
-        let convert_into_usize = |num: i64| -> usize {
-            num.abs().try_into().unwrap()
-        };
+        let convert_into_usize = |num: i64| -> usize { num.abs().try_into().unwrap() };
 
         Painter::new(move |ctx, count: &i64, env| {
             let bounds = ctx.size().to_rect();
@@ -79,15 +71,11 @@ impl CounterColumnPainter {
                     } else {
                         &nums_svg[convert_into_usize((*count % 1000) / 100)]
                     }
-                },
-                CounterColumn::Second => {
-                    &nums_svg[convert_into_usize((*count % 100) / 10)]
-                },
-                CounterColumn::Third => {
-                    &nums_svg[convert_into_usize(*count % 10)]
-                },
+                }
+                CounterColumn::Second => &nums_svg[convert_into_usize((*count % 100) / 10)],
+                CounterColumn::Third => &nums_svg[convert_into_usize(*count % 10)],
             };
-    
+
             Svg::new(svg_data.clone()).paint(ctx, count, env);
         })
     }

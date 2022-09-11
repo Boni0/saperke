@@ -49,7 +49,8 @@ impl Widget<GridSize> for WindowSizeObserverWidget {
     fn event(&mut self, _ctx: &mut EventCtx, _event: &Event, _data: &mut GridSize, _env: &Env) {}
 
     fn update(&mut self, ctx: &mut UpdateCtx, _old_data: &GridSize, data: &GridSize, _env: &Env) {
-        ctx.window().set_size(WindowSizeObserverWidget::get_window_size(data));
+        ctx.window()
+            .set_size(WindowSizeObserverWidget::get_window_size(data));
     }
 
     fn lifecycle(
@@ -60,7 +61,8 @@ impl Widget<GridSize> for WindowSizeObserverWidget {
         _env: &Env,
     ) {
         if let LifeCycle::WidgetAdded = event {
-            ctx.window().set_size(WindowSizeObserverWidget::get_window_size(data));
+            ctx.window()
+                .set_size(WindowSizeObserverWidget::get_window_size(data));
         }
     }
 
