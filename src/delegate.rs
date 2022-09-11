@@ -1,3 +1,5 @@
+use std::env;
+
 use druid::commands::QUIT_APP;
 use druid::{
     AppDelegate, Command, DelegateCtx, Env, Handled, Selector, Size, Target, WindowDesc, WindowId,
@@ -173,6 +175,12 @@ impl AppDelegate<AppState> for MainDelegate {
             let about_window = WindowDesc::new(ui::about_window_build());
             self.about_window_id = Some(about_window.id);
 
+            let mut about_window_size = ABOUT_WINDOW_SIZE;
+
+            if env::consts::OS == "windows" {
+                about_window_size.height += 50.0;
+            }
+
             ctx.new_window(
                 about_window
                     .title(format!("{} - {}", TITLE, ABOUT_TITLE))
@@ -181,7 +189,7 @@ impl AppDelegate<AppState> for MainDelegate {
                         width: 0.0,
                         height: 0.0,
                     })
-                    .window_size(ABOUT_WINDOW_SIZE),
+                    .window_size(about_window_size),
             );
 
             delegate_handled = Handled::Yes;
