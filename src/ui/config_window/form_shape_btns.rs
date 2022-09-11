@@ -4,6 +4,7 @@ use druid::{
 };
 
 use crate::{
+    consts::CUSTOM_GAME_SHAPE_BOX_NAME,
     grid::{GridPredefinedBoxDifficulty, GridStartShape, GridUnusualVariant},
     ui::border_box::{BorderBox, BorderColorPattern},
 };
@@ -32,19 +33,23 @@ impl ConfigWindowShapeBtns {
         let mut main_row = Flex::row();
 
         main_row.add_child(
-            SizedBox::new(Label::new("Box").with_text_color(Color::BLACK).center())
-                .background(make_btn_painter(vec![
-                    GridStartShape::Box,
-                    GridStartShape::PredefinedBox(GridPredefinedBoxDifficulty::Beginner),
-                    GridStartShape::PredefinedBox(GridPredefinedBoxDifficulty::Intermediate),
-                    GridStartShape::PredefinedBox(GridPredefinedBoxDifficulty::Expert),
-                ]))
-                .fix_size(60.0, 25.0)
-                .on_click(|_, data: &mut ConfigWindow, _| {
-                    if let GridStartShape::Unusual(_) = data.custom_start_shape {
-                        data.custom_start_shape = GridStartShape::Box
-                    }
-                }),
+            SizedBox::new(
+                Label::new(CUSTOM_GAME_SHAPE_BOX_NAME)
+                    .with_text_color(Color::BLACK)
+                    .center(),
+            )
+            .background(make_btn_painter(vec![
+                GridStartShape::Box,
+                GridStartShape::PredefinedBox(GridPredefinedBoxDifficulty::Beginner),
+                GridStartShape::PredefinedBox(GridPredefinedBoxDifficulty::Intermediate),
+                GridStartShape::PredefinedBox(GridPredefinedBoxDifficulty::Expert),
+            ]))
+            .fix_size(60.0, 25.0)
+            .on_click(|_, data: &mut ConfigWindow, _| {
+                if let GridStartShape::Unusual(_) = data.custom_start_shape {
+                    data.custom_start_shape = GridStartShape::Box
+                }
+            }),
         );
 
         for variant in GridUnusualVariant::iter() {

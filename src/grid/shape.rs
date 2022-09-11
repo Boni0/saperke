@@ -1,8 +1,14 @@
 use druid::{im::Vector, Data};
 use strum_macros::EnumIter;
 
-use crate::variants::{
-    CIRCLE_EMPTY_POINTS, CIRCLE_SIZE, HEART_EMPTY_POINTS, HEART_SIZE, HEHE_EMPTY_POINTS, HEHE_SIZE,
+use crate::{
+    consts::{
+        CUSTOM_GAME_SHAPE_CIRCLE_NAME, CUSTOM_GAME_SHAPE_HEART_NAME, CUSTOM_GAME_SHAPE_HEHE_NAME,
+    },
+    variants::{
+        CIRCLE_EMPTY_POINTS, CIRCLE_SIZE, HEART_EMPTY_POINTS, HEART_SIZE, HEHE_EMPTY_POINTS,
+        HEHE_SIZE,
+    },
 };
 
 use super::{GridCellPoint, GridSize, NonExistedPoints, SizeUnit};
@@ -39,9 +45,9 @@ impl GridUnusualVariant {
 
     pub fn get_variant_label<'a>(variant: &'a GridUnusualVariant) -> &'a str {
         match variant {
-            GridUnusualVariant::Heart => "Heart",
-            GridUnusualVariant::Hehe => ":-DDD",
-            GridUnusualVariant::Circle => "Circle",
+            GridUnusualVariant::Heart => CUSTOM_GAME_SHAPE_HEART_NAME,
+            GridUnusualVariant::Hehe => CUSTOM_GAME_SHAPE_HEHE_NAME,
+            GridUnusualVariant::Circle => CUSTOM_GAME_SHAPE_CIRCLE_NAME,
         }
     }
 

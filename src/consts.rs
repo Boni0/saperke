@@ -26,6 +26,7 @@ pub const MENU_GAME: &str = "Game";
 pub const MENU_GAME_NEW: &str = "New";
 pub const MENU_GAME_PAUSE: &str = "Pause";
 pub const GAME_PAUSED_INFO: &str = "Paused! Click to continue";
+pub const GAME_FINAL_TIME_INFO: &str = "Final Time";
 
 pub const MENU_GAME_BEGINNER: &str = "Beginner";
 pub const MENU_GAME_INTERMEDIATE: &str = "Intermediate";
@@ -58,6 +59,11 @@ pub const GAME_EXPERT_DIFFICULTY_SIZE: GridSize = GridSize {
     height: 16,
 };
 pub const GAME_EXPERT_DIFFICULTY_BOMBS_AMOUNT: SizeUnit = 99;
+
+pub const CUSTOM_GAME_SHAPE_BOX_NAME: &str = "Box";
+pub const CUSTOM_GAME_SHAPE_HEART_NAME: &str = "Heart";
+pub const CUSTOM_GAME_SHAPE_HEHE_NAME: &str = ":-DDD";
+pub const CUSTOM_GAME_SHAPE_CIRCLE_NAME: &str = "Circle";
 
 pub const CUSTOM_GAME_WIDTH_FROM_LABEL: &str = "Width";
 pub const CUSTOM_GAME_HEIGHT_FROM_LABEL: &str = "Height";

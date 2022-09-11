@@ -3,7 +3,7 @@ use druid::{
     Color, Widget, WidgetExt,
 };
 
-use crate::game::Game;
+use crate::{consts::GAME_FINAL_TIME_INFO, game::Game};
 
 pub struct FinalTimeStatus;
 
@@ -12,7 +12,13 @@ impl FinalTimeStatus {
         let mut label = Label::<Game>::dynamic(|data, _| {
             let sec = data.time.final_time_duration.as_secs();
             let millis = data.time.final_time_duration.subsec_millis();
-            format!("Final Time {}:{}:{}", sec / 60, sec % 60, millis)
+            format!(
+                "{} {}:{}:{}",
+                GAME_FINAL_TIME_INFO,
+                sec / 60,
+                sec % 60,
+                millis
+            )
         });
         label.set_text_color(Color::BLACK);
         label.set_text_size(14.0);

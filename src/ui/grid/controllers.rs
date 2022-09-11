@@ -1,5 +1,5 @@
 use druid::widget::Controller;
-use druid::{Env, Event, EventCtx, MouseButton, Point, Widget};
+use druid::{Env, Event, EventCtx, Point, Widget};
 
 use crate::consts::{GRID_CELL_HEIGHT, GRID_CELL_WIDTH};
 
@@ -11,14 +11,12 @@ use crate::delegate::{
 use crate::grid::{Grid, GridCellPoint};
 
 pub struct GridController {
-    pub last_button_clicked: MouseButton,
     pub last_active_cell_points: Vec<GridCellPoint>,
 }
 
 impl GridController {
     pub fn new() -> Self {
         Self {
-            last_button_clicked: MouseButton::None,
             last_active_cell_points: Vec::new(),
         }
     }
