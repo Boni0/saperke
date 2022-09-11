@@ -1,7 +1,7 @@
 use druid::{
     commands::CLOSE_WINDOW,
     widget::{Flex, Label, LineBreaking, MainAxisAlignment, Painter, SizedBox},
-    Color, FontDescriptor, FontWeight, Widget, WidgetExt,
+    Color, FontDescriptor, FontWeight, Size, Widget, WidgetExt,
 };
 
 use crate::{
@@ -15,12 +15,17 @@ use webbrowser;
 
 use super::border_box::{BorderBox, BorderColorPattern};
 
+pub const ABOUT_WINDOW_SIZE: Size = Size {
+    width: 350.0,
+    height: 185.0,
+};
+
 pub struct AboutWindow;
 impl AboutWindow {
     pub fn new() -> impl Widget<AppState> {
         let mut flex = Flex::column();
 
-        let desc = Label::new(format!("{}:{}", TITLE, ABOUT_DESC))
+        let desc = Label::new(format!("{}: {}", TITLE, ABOUT_DESC))
             .with_text_color(Color::BLACK)
             .with_line_break_mode(LineBreaking::WordWrap);
 
